@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variant 3 - Blueprint grid (design mockup)</title>
+<style>
+  /* ============================================================
+     VARIANT 3 - "BLUEPRINT GRID"
+     Stance: the whole account as ONE MAP you read at a glance and
+     then interrogate. Every item is a cell; the grid is arranged by
+     whatever you are worried about (project / survey / week).
+     Hover for detail, click to open, DRAG to select a region.
+     Ground is faint blueprint paper, as the product already uses for
+     construction drawings.
+     ============================================================ */
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#24417B;
+    --ink:#0E1930;
+    --ink-2:#4B5871;
+    --ink-3:#8B94A6;
+    --laser:#57FF00;
+    --laser-ink:#2F7A00;
+    --open:#B9C4D6;
+    --late:#E0562A;
+    --paper:#FBFAF7;
+    --card:#FFFFFF;
+    --rule:#DFDCD2;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  body{
+    font-family:var(--sans);background:var(--paper);color:var(--ink);
+    -webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden;
+  }
+  .mock-note{background:var(--navy);color:#fff;font:600 12px/1.4 var(--sans);text-align:center;padding:7px 12px}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 26px}
+  @media (max-width:640px){.wrap{padding:0 16px}}
+
+  .mast{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;padding:24px 0 18px}
+  .mark{font-size:18px;font-weight:800;letter-spacing:-.02em;color:var(--navy)}
+  .mark i{font-style:normal;color:var(--ink)}
+  .mast .who{margin-left:auto;font-size:12.5px;color:var(--ink-2)}
+
+  h1{font-size:clamp(24px,3.4vw,36px);line-height:1.08;letter-spacing:-.03em;font-weight:800;max-width:26ch;margin-bottom:8px}
+  .sub{font-size:14.5px;color:var(--ink-2);max-width:74ch;margin-bottom:22px}
+
+  /* ---------- controls ---------- */
+  .bar{
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    padding:12px 14px;background:var(--card);border:1px solid var(--rule);border-radius:12px;margin-bottom:14px;
+  }
+  .bar .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.15em;color:var(--ink-3)}
+  .seg{display:inline-flex;gap:2px;background:#EFEDE4;border-radius:999px;padding:3px}
+  .seg button{appearance:none;border:0;background:none;border-radius:999px;cursor:pointer;font:600 12.5px var(--sans);color:var(--ink-2);padding:6px 13px}
+  .seg button[aria-pressed=true]{background:var(--navy);color:#fff}
+  .legend{margin-left:auto;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .legend span{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
+  .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+  /* ---------- the grid ---------- */
+  .map{background:var(--card);border:1px solid var(--rule);border-radius:12px;overflow:hidden;position:relative}
+  .map::before{
+    content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+    background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,var(--rule) 1px,transparent 1px);
+    background-size:48px 48px;
+  }
+  .row{display:grid;grid-template-columns:200px minmax(0,1fr) 92px;gap:0;align-items:center;
+       border-bottom:1px solid var(--rule);position:relative}
+  .row:last-child{border-bottom:0}
+  @media (max-width:820px){.row{grid-template-columns:minmax(0,1fr) 76px}.row .rlabel{grid-column:1/-1;padding-bottom:0}}
+  .rlabel{padding:14px 16px;min-width:0}
+  .rlabel .rn{font-size:13px;font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rlabel .rr{font:500 11px var(--mono);color:var(--ink-3);display:block;margin-top:2px}
+  .cells{display:flex;flex-wrap:wrap;gap:3px;padding:14px 10px}
+  .cell{
+    width:15px;height:15px;border-radius:3px;border:1px solid rgba(14,25,48,.08);
+    background:var(--open);cursor:pointer;padding:0;position:relative;
+    transition:transform .12s cubic-bezier(.16,1,.3,1),box-shadow .12s;
+  }
+  .cell:hover{transform:scale(1.45);z-index:4;box-shadow:0 4px 12px rgba(14,25,48,.3)}
+  .cell:focus-visible{outline:3px solid var(--navy);outline-offset:2px;z-index:5}
+  .cell.c-closed{background:var(--laser)}
+  .cell.c-assigned{background:var(--navy)}
+  .cell.c-open{background:var(--open)}
+  .cell.c-late{background:var(--late)}
+  .cell.c-none{background:transparent;border:1px dashed #C9CDD6}
+  .cell.sel{box-shadow:0 0 0 2.5px var(--ink);transform:scale(1.3);z-index:3}
+  .more{
+    font:600 11px var(--mono);color:var(--ink-3);align-self:center;padding:3px 7px;
+    border:1px dashed var(--rule);border-radius:5px;white-space:nowrap;
+  }
+  /* needs-attention list: rows, not cards, so it stays scannable */
+  .arow{
+    display:grid;grid-template-columns:150px minmax(0,1fr) 190px 96px;gap:14px;align-items:center;
+    width:100%;background:#fff;border:1px solid var(--rule);border-top:0;border-radius:0;
+    padding:11px 14px;cursor:pointer;text-align:left;font-family:inherit;color:inherit;
+  }
+  .arow:first-child{border-radius:10px 10px 0 0;border-top:1px solid var(--rule)}
+  .arow:last-child{border-radius:0 0 10px 10px}
+  .arow:hover{background:#F5F7FB}
+  @media (max-width:860px){.arow{grid-template-columns:minmax(0,1fr) 90px}.arow .aproj{display:none}}
+  .aref{font:600 12px var(--mono);color:var(--navy)}
+  .atitle{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .aproj{font-size:12px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .alate{font:600 12px var(--mono);color:var(--late);text-align:right}
+  .rsum{padding:14px 16px 14px 0;text-align:right;font:700 15px var(--mono)}
+  .rsum em{font-style:normal;display:block;font:500 10.5px var(--sans);color:var(--ink-3);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+
+  /* ---------- selection strip ---------- */
+  .selbar{
+    display:none;align-items:center;gap:14px;flex-wrap:wrap;
+    margin-top:14px;padding:12px 14px;border:1px solid var(--ink);border-radius:12px;background:#F1F4FA;
+  }
+  .selbar.on{display:flex}
+  .selbar b{font:700 14px var(--sans)}
+  .selbar button{
+    appearance:none;border:1px solid var(--rule);background:#fff;border-radius:8px;cursor:pointer;
+    font:600 12.5px var(--sans);color:var(--ink);padding:7px 12px;
+  }
+  .selbar button.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+  .selbar button:hover{filter:brightness(.96)}
+  #sellist{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  #sellist span{font:500 12px var(--mono);color:var(--ink-2);background:#fff;border:1px solid var(--rule);border-radius:6px;padding:4px 8px}
+
+  /* ---------- drawer ---------- */
+  #scrim{position:fixed;inset:0;background:rgba(14,25,48,.34);opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+  #scrim.on{opacity:1;pointer-events:auto}
+  #drawer{
+    position:fixed;top:0;right:0;bottom:0;width:min(440px,92vw);background:var(--card);z-index:21;
+    transform:translateX(102%);transition:transform .28s cubic-bezier(.16,1,.3,1);
+    display:flex;flex-direction:column;box-shadow:-24px 0 60px -20px rgba(14,25,48,.4)
+  }
+  #drawer.on{transform:none}
+  @media (prefers-reduced-motion:reduce){#drawer{transition:none}.cell{transition:none}}
+  .dhead{display:flex;align-items:flex-start;gap:14px;padding:20px 22px 14px;border-bottom:1px solid var(--rule)}
+  .dhead .tag{font:700 10.5px var(--sans);text-transform:uppercase;letter-spacing:.14em;border-radius:5px;padding:4px 8px;background:#F1F4FA;color:var(--navy)}
+  .dhead h2{font-size:19px;line-height:1.22;letter-spacing:-.02em;font-weight:800;margin-top:8px}
+  .xbtn{margin-left:auto;appearance:none;border:1px solid var(--rule);background:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:15px;color:var(--ink-2);flex:0 0 auto}
+  .dbody{padding:18px 22px;overflow-y:auto;flex:1}
+  .kv{display:grid;grid-template-columns:118px minmax(0,1fr);gap:9px 14px;font-size:13.5px;margin-bottom:22px}
+  .kv dt{color:var(--ink-3);font-size:12px;text-transform:uppercase;letter-spacing:.1em;padding-top:2px}
+  .kv dd{color:var(--ink);word-break:break-word}
+  .kv dd.mono{font-family:var(--mono);font-size:12.5px}
+  .dfoot{padding:16px 22px;border-top:1px solid var(--rule);display:flex;gap:10px;flex-wrap:wrap}
+  .dfoot button{
+    appearance:none;border:1px solid var(--navy);background:var(--navy);color:#fff;border-radius:9px;
+    font:600 13.5px var(--sans);padding:11px 16px;cursor:pointer;flex:1 1 auto;
+  }
+  .dfoot button.ghost{background:#fff;color:var(--navy)}
+  .dfoot button:hover{filter:brightness(1.08)}
+
+  /* tooltip + toast */
+  #tip{position:fixed;pointer-events:none;background:var(--ink);color:#fff;font:600 12px var(--sans);
+       padding:7px 10px;border-radius:7px;opacity:0;transition:opacity .12s;z-index:30;max-width:280px;box-shadow:0 12px 28px rgba(0,0,0,.34)}
+  #tip.on{opacity:1}
+  #tip em{font-style:normal;color:#B9C4D6;font-weight:500;display:block;margin-top:3px}
+  #toast{
+    position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);background:var(--ink);color:#fff;
+    font:600 13px var(--sans);border-radius:9px;padding:11px 16px;opacity:0;pointer-events:none;
+    transition:opacity .2s,transform .2s;z-index:40
+  }
+  #toast.on{opacity:1;transform:translate(-50%,0)}
+  footer{padding:24px 0 60px;font-size:12.5px;color:var(--ink-3);max-width:82ch}
+  footer b{color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="mock-note"><b>DESIGN MOCKUP</b> - not the live product. Figures are sample data. Variant 3 of 3: "Blueprint grid".</div>
+
+<div class="wrap">
+  <div class="mast">
+    <div class="mark">instruct<i>Brain</i></div>
+    <div class="who">Organisation <b>instructSite</b> &nbsp;|&nbsp; <span id="total">-</span></div>
+  </div>
+
+  <h1>Every item on one map.</h1>
+  <p class="sub">
+    One square is one item. Colour is its state. Hover any square to read it, click to open it,
+    or drag across a block to pull out a set and act on them together. Regroup the whole map by
+    project, by survey or by week without leaving the page.
+  </p>
+
+  <div class="bar">
+    <span class="lbl">Group by</span>
+    <div class="seg" role="group" aria-label="Group the map by">
+      <button type="button" data-g="project" aria-pressed="true">Project</button>
+      <button type="button" data-g="survey" aria-pressed="false">Survey type</button>
+      <button type="button" data-g="week" aria-pressed="false">Week</button>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:#57FF00"></i>Closed out</span>
+      <span><i class="dot" style="background:#24417B"></i>Allocated</span>
+      <span><i class="dot" style="background:#B9C4D6"></i>Open</span>
+      <span><i class="dot" style="background:#E0562A"></i>Overdue</span>
+      <span><i class="dot" style="background:transparent;border:1px dashed #C9CDD6"></i>Not assessed</span>
+    </div>
+  </div>
+
+  <div class="map" id="map" role="grid" aria-label="Items map"></div>
+
+  <div class="selbar" id="selbar">
+    <b id="selcount">0 items selected</b>
+    <span style="font-size:12.5px;color:var(--ink-2)" id="seldesc"></span>
+    <span style="margin-left:auto;display:flex;gap:10px;flex-wrap:wrap">
+      <button type="button" id="selcopy">Copy references</button>
+      <button type="button" class="primary" id="selpack">Build a pack</button>
+      <button type="button" id="selclear">Clear</button>
+    </span>
+  </div>
+  <div id="sellist"></div>
+
+  <section id="attn" style="margin-top:22px"></section>
+
+  <footer>
+    <b>Why a map.</b> A list tells you what happened; a map tells you where the weight is. The empty
+    dashed squares are items nobody has assessed yet, which is the thing a percentage hides.
+    Counts, states and reference formats are sample data shaped from live instructBrain records.
+  </footer>
+</div>
+
+<div id="scrim"></div>
+<aside id="drawer" role="dialog" aria-modal="true" aria-labelledby="d-title">
+  <div class="dhead">
+    <div>
+      <span class="tag" id="d-tag">ITEM</span>
+      <h2 id="d-title">-</h2>
+    </div>
+    <button type="button" class="xbtn" id="d-close" aria-label="Close">✕</button>
+  </div>
+  <div class="dbody">
+    <dl class="kv">
+      <dt>Reference</dt><dd class="mono" id="d-ref">-</dd>
+      <dt>Report</dt><dd id="d-report">-</dd>
+      <dt>Project</dt><dd id="d-project">-</dd>
+      <dt>Survey</dt><dd id="d-survey">-</dd>
+      <dt>State</dt><dd id="d-state">-</dd>
+      <dt>Due</dt><dd id="d-due">-</dd>
+      <dt>Raised</dt><dd class="mono" id="d-raised">-</dd>
+    </dl>
+    <p style="font-size:13.5px;color:var(--ink-2)">
+      Every square opens the real record rather than a summary. This mockup does not navigate, so the
+      buttons below only show what they would do.
+    </p>
+  </div>
+  <div class="dfoot">
+    <button type="button" id="d-open">Open the report</button>
+    <button type="button" class="ghost" id="d-assign">Allocate to a trade</button>
+  </div>
+</aside>
+<div id="tip"></div>
+<div id="toast"></div>
+
+<script>
+/* ---------- sample data, shaped from live records ---------- */
+function rng(seed){ return function(){ seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }; }
+const rand = rng(20261011);
+
+const SURVEYS = [
+  "Property inventory and schedule of condition",
+  "Electrical installation condition",
+  "Fit-out and finishes quality",
+  "Mechanical and HVAC installation",
+  "Damp, mould and water ingress",
+  "Site condition"
+];
+const PROJECTS = [
+  { name:"Demonstration property - London", ref:"DEMO-001", items:117 },
+  { name:"Riverside Court - Cat B Fit-Out, Phase 2", ref:"HCE-2417", items:16 },
+  { name:"instructSiteTEST", ref:"Production", items:0 }
+];
+const WEEKS = ["17-23 Aug","24-30 Aug","31 Aug-6 Sep","7-13 Sep","14-20 Sep","21-27 Sep","28 Sep-4 Oct","5-11 Oct"];
+
+const WORDS = [
+  "Kitchen extract - filter not fitted","En-suite sealant perished at tray","Entrance door closer out of adjustment",
+  "Bath panel fixing loose","Circuit chart not at the board","Distribution board 2 - cover missing",
+  "Bonding to water incomer not labelled","Skirting mitre open at 12mm","Ceiling grid level out by 9mm over 4m",
+  "Door swing clashes with radiator","AHU access panel fouling pipework","Condensate trap not primed",
+  "Mould to rear bedroom ceiling","Rising damp at skirting, hall","Edge protection - end stop missing",
+  "Dust sheet torn at landing","Temporary works tag out of date","Fire door gap exceeds 4mm",
+  "Socket outlet cracked faceplate","Riser penetration not fire stopped","Below-floor void debris not cleared",
+  "Handrail fixing loose at landing","Roof light seal pinched at corner","Gutter running joint leaking"
+];
+const TRADES = ["Groundworks","Mechanical","Electrical","Drylining","Roofing","Fire stopping","Unallocated"];
+const REFPREFIX = ["DEMO-INV","DEMO-EL","DEMO-FQ","DEMO-MS","DEMO-DM","DEMO-SC","EIC-2026-10","MPR-2026-10","SNG-2026-10"];
+
+/* Build items with an even spread of states, so the map has real texture. */
+const ITEMS = [];
+let n = 0;
+for (const p of PROJECTS){
+  const cap = Math.min(p.items, 60);
+  for (let i = 0; i < cap; i++){
+    n++;
+    const r = rand();
+    let state = "open";
+    if (r > 0.86) state = "late";
+    else if (r > 0.62) state = "assigned";
+    else if (r > 0.54) state = "closed";
+    else if (r > 0.48) state = "none";
+    const survey = SURVEYS[Math.floor(rand() * SURVEYS.length)];
+    const week = WEEKS[Math.floor(rand() * WEEKS.length)];
+    ITEMS.push({
+      id: n,
+      title: WORDS[Math.floor(rand() * WORDS.length)],
+      ref: REFPREFIX[Math.floor(rand() * REFPREFIX.length)] + "-" + String(100 + Math.floor(rand() * 899)),
+      project: p.name,
+      projectRef: p.ref,
+      survey: survey,
+      state: state,
+      week: week,
+      due: state === "late" ? (2 + Math.floor(rand() * 12)) + " days past" : (5 + Math.floor(rand() * 25)) + " days",
+      raised: ["2 Oct 2026","8 Oct 2026","9 Oct 2026","11 Oct 2026"][Math.floor(rand() * 4)],
+      trade: TRADES[Math.floor(rand() * TRADES.length)]
+    });
+  }
+}
+
+const STATE_LABEL = { closed:"Closed out", assigned:"Allocated", open:"Open", late:"Overdue", none:"Not assessed" };
+const $ = (id) => document.getElementById(id);
+let groupBy = "project";
+let plain = [];
+
+function groupRows(){
+  if (groupBy === "project"){
+    return PROJECTS.map(p => ({
+      key: p.name, name: p.name, ref: p.ref,
+      items: ITEMS.filter(i => i.project === p.name),
+      total: p.items
+    }));
+  }
+  if (groupBy === "survey"){
+    return SURVEYS.map(s => ({
+      key: s, name: s, ref: "",
+      items: ITEMS.filter(i => i.survey === s),
+      total: ITEMS.filter(i => i.survey === s).length
+    }));
+  }
+  return WEEKS.slice().reverse().map(w => ({
+    key: w, name: w, ref: "",
+    items: ITEMS.filter(i => i.week === w),
+    total: ITEMS.filter(i => i.week === w).length
+  }));
+}
+
+function render(){
+  const rows = groupRows();
+  $("total").textContent = ITEMS.length + " items shown of 133 on the account";
+
+  $("map").innerHTML = rows.map(row => {
+    const shown = row.items.slice(0, 60);
+    // The row summary shows the TRUE total, and the cells say when they are only
+    // part of it. A capped row that silently reports the cap is a lie by omission.
+    const extra = Math.max(0, row.total - shown.length);
+    const late = row.items.filter(i => i.state === "late").length;
+    return '<div class="row" role="row">' +
+      '<div class="rlabel"><span class="rn" title="' + row.name + '">' + row.name + '</span>' +
+        (row.ref ? '<span class="rr">' + row.ref + '</span>' : '<span class="rr">' + row.items.length + ' items</span>') + '</div>' +
+      '<div class="cells">' + shown.map(i =>
+        '<button type="button" class="cell c-' + i.state + (plain.indexOf(i.id) > -1 ? ' sel' : '') +
+        '" data-id="' + i.id + '" aria-label="' + i.title + '"></button>').join("") +
+        (extra > 0 ? '<span class="more">+' + extra + ' not shown</span>' : '') +
+      '</div>' +
+      '<div class="rsum">' + row.total + (late ? '<em>' + late + ' late</em>' : '<em>none late</em>') + '</div>' +
+    '</div>';
+  }).join("");
+
+  // The map shows where the weight is; this says what to do about it first.
+  const late = ITEMS.filter(i => i.state === "late").sort((a, b) => parseInt(b.due) - parseInt(a.due));
+  const none = ITEMS.filter(i => i.state === "none").length;
+  $("attn").innerHTML =
+    '<div class="bar" style="margin:0 0 12px"><span class="lbl">Needs attention now</span>' +
+    '<span style="font-size:12.5px;color:var(--ink-2)">' + late.length + ' overdue, ' + none +
+    ' items nobody has assessed yet</span>' +
+    '<button type="button" class="primary" style="margin-left:auto;appearance:none;border:1px solid var(--navy);background:var(--navy);color:#fff;border-radius:9px;font:600 13px var(--sans);padding:9px 14px;cursor:pointer" id="attn-pack">Build a pack from these</button></div>' +
+    '<div id="attnlist"></div>';
+  $("attnlist").innerHTML = late.slice(0, 8).map(i =>
+    '<button type="button" class="arow" data-id="' + i.id + '">' +
+      '<span class="aref">' + i.ref + '</span>' +
+      '<span class="atitle">' + i.title + '</span>' +
+      '<span class="aproj">' + i.project + '</span>' +
+      '<span class="alate">' + i.due + '</span>' +
+    '</button>').join("");
+  const ap = $("attn-pack");
+  if (ap) ap.addEventListener("click", () => toast("In the product this gathers every overdue item into one document."));
+}
+
+/* ---------- hover ---------- */
+const tip = $("tip");
+document.addEventListener("mousemove", (e) => {
+  const cell = e.target.closest(".cell");
+  if (cell){
+    const i = ITEMS.find(x => x.id === Number(cell.getAttribute("data-id")));
+    if (i){
+      tip.innerHTML = i.title + '<em>' + i.ref + ' | ' + STATE_LABEL[i.state] + ' | ' + i.project + '</em>';
+      tip.classList.add("on");
+      tip.style.left = Math.min(window.innerWidth - 300, e.clientX + 14) + "px";
+      tip.style.top = Math.max(10, e.clientY - 52) + "px";
+    }
+  } else tip.classList.remove("on");
+});
+
+/* ---------- click + drag-select ---------- */
+let dragging = false, dragged = false;
+$("map").addEventListener("pointerdown", (e) => {
+  if (!e.target.closest(".cell")) return;
+  dragging = true; dragged = false; plain = [];
+  addCell(e.target.closest(".cell"));
+});
+document.addEventListener("pointermove", (e) => {
+  if (!dragging) return;
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const cell = el && el.closest ? el.closest(".cell") : null;
+  if (cell){ dragged = true; addCell(cell); }
+});
+document.addEventListener("pointerup", () => {
+  if (!dragging) return;
+  dragging = false;
+  if (!dragged && plain.length === 1) openDrawer(plain[0]);
+  renderSelection();
+  document.querySelectorAll(".cell.sel").forEach(c => c.classList.remove("sel"));
+  document.querySelectorAll(".cell").forEach(c => {
+    if (plain.indexOf(Number(c.getAttribute("data-id"))) > -1) c.classList.add("sel");
+  });
+});
+
+function addCell(cell){
+  const id = Number(cell.getAttribute("data-id"));
+  if (plain.indexOf(id) === -1) plain.push(id);
+}
+
+function renderSelection(){
+  const bar = $("selbar");
+  if (!plain.length){ bar.classList.remove("on"); $("sellist").innerHTML = ""; return; }
+  bar.classList.add("on");
+  const items = ITEMS.filter(i => plain.indexOf(i.id) > -1);
+  const late = items.filter(i => i.state === "late").length;
+  const projects = Array.from(new Set(items.map(i => i.project)));
+  $("selcount").textContent = items.length + " item" + (items.length === 1 ? "" : "s") + " selected";
+  $("seldesc").textContent = (projects.length === 1 ? projects[0] : projects.length + " projects") +
+    (late ? " - " + late + " overdue" : "");
+  $("sellist").innerHTML = items.slice(0, 14).map(i =>
+    '<span>' + i.ref + '</span>').join("") +
+    (items.length > 14 ? '<span>+' + (items.length - 14) + ' more</span>' : "");
+}
+
+/* ---------- drawer ---------- */
+function openDrawer(id){
+  const i = ITEMS.find(x => x.id === id);
+  if (!i) return;
+  $("d-tag").textContent = STATE_LABEL[i.state].toUpperCase();
+  $("d-title").textContent = i.title;
+  $("d-ref").textContent = i.ref;
+  $("d-report").textContent = i.survey + " - " + i.raised;
+  $("d-project").textContent = i.project + " (" + i.projectRef + ")";
+  $("d-survey").textContent = i.survey;
+  $("d-state").textContent = STATE_LABEL[i.state] + (i.state === "assigned" ? " - " + i.trade : "");
+  $("d-due").textContent = i.due;
+  $("d-raised").textContent = i.raised;
+  $("drawer").classList.add("on");
+  $("scrim").classList.add("on");
+  $("d-close").focus();
+}
+function closeDrawer(){
+  $("drawer").classList.remove("on");
+  $("scrim").classList.remove("on");
+}
+$("d-close").addEventListener("click", closeDrawer);
+$("scrim").addEventListener("click", closeDrawer);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
+// The attention list opens the same record the map does.
+document.addEventListener("click", (e) => {
+  const row = e.target.closest(".arow");
+  if (row) openDrawer(Number(row.getAttribute("data-id")));
+});
+
+function toast(msg){
+  const t = $("toast");
+  t.textContent = msg; t.classList.add("on");
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove("on"), 2600);
+}
+$("d-open").addEventListener("click", () => toast("In the product this opens the report behind the item."));
+$("d-assign").addEventListener("click", () => toast("In the product this opens the allocation sheet for this item."));
+$("selpack").addEventListener("click", () => toast("In the product this builds one document from the selected items."));
+$("selcopy").addEventListener("click", () => {
+  const refs = ITEMS.filter(i => plain.indexOf(i.id) > -1).map(i => i.ref).join(", ");
+  navigator.clipboard && navigator.clipboard.writeText(refs);
+  toast("References copied: " + refs.split(", ").length + " of them.");
+});
+$("selclear").addEventListener("click", () => { plain = []; renderSelection(); render(); });
+
+document.querySelector(".seg").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-g]");
+  if (!b) return;
+  groupBy = b.getAttribute("data-g");
+  plain = [];
+  renderSelection();
+  document.querySelectorAll("button[data-g]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  $("map").style.opacity = "0.35";
+  setTimeout(() => { render(); $("map").style.opacity = "1"; }, 130);
+});
+
+render();
+</script>
+</body>
+</html>

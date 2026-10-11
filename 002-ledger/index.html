@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variant 2 - Ledger (design mockup)</title>
+<style>
+  /* ============================================================
+     VARIANT 2 - "LEDGER"
+     Stance: one idea per band, huge numerals, generous space.
+     The opposite pole to Control Room: no instrument panels, no
+     boxes. Type does the work. Laser Green appears only as fills,
+     never as text on light paper (it fails contrast on white).
+     ============================================================ */
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#24417B;
+    --ink:#101A2E;
+    --ink-2:#46536B;
+    --ink-3:#7A859B;
+    --laser:#57FF00;
+    --paper:#F7F7F3;
+    --card:#FFFFFF;
+    --rule:#DEDCD2;
+    --warn:#C2560F;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  body{
+    font-family:var(--sans);background:var(--paper);color:var(--ink);
+    -webkit-font-smoothing:antialiased;line-height:1.55;
+  }
+  .mock-note{background:var(--navy);color:#fff;font:600 12px/1.4 var(--sans);
+    text-align:center;padding:7px 12px;letter-spacing:.01em}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 26px}
+  @media (max-width:640px){.wrap{padding:0 18px}}
+
+  /* ---------- masthead ---------- */
+  .mast{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;padding:26px 0 22px;border-bottom:1px solid var(--rule)}
+  .mark{font-size:18px;font-weight:800;letter-spacing:-.02em;color:var(--navy)}
+  .mark i{font-style:normal;color:var(--ink)}
+  .mast .who{margin-left:auto;font-size:12.5px;color:var(--ink-2)}
+  .mast .who b{color:var(--ink)}
+  h1{font-size:clamp(30px,5vw,52px);line-height:1.02;letter-spacing:-.035em;font-weight:800;margin:38px 0 6px;max-width:19ch}
+  .standfirst{font-size:15.5px;color:var(--ink-2);max-width:62ch;margin-bottom:26px}
+
+  /* ---------- window control ---------- */
+  .window{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-bottom:26px;border-bottom:1px solid var(--rule)}
+  .window .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.15em;color:var(--ink-3)}
+  .seg{display:inline-flex;gap:2px;background:#ECEAE0;border-radius:999px;padding:3px}
+  .seg button{
+    appearance:none;border:0;background:none;border-radius:999px;cursor:pointer;
+    font:600 13px var(--sans);color:var(--ink-2);padding:7px 16px;
+  }
+  .seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+  .seg button:hover:not([aria-pressed=true]){color:var(--ink)}
+
+  /* ---------- hero figure ---------- */
+  .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:44px;align-items:end;padding:44px 0 40px;border-bottom:1px solid var(--rule)}
+  @media (max-width:820px){.hero{grid-template-columns:1fr;gap:26px}}
+  .bigfig{font:800 clamp(64px,13vw,140px)/0.86 var(--sans);letter-spacing:-.05em;color:var(--ink)}
+  .bigfig .u{font-size:.3em;font-weight:700;color:var(--ink-3);letter-spacing:0;margin-left:8px}
+  .figlabel{font-size:13px;text-transform:uppercase;letter-spacing:.15em;color:var(--ink-3);margin-bottom:10px}
+  .delta{display:inline-flex;align-items:center;gap:8px;font:600 13.5px var(--mono);color:var(--ink-2);margin-top:14px}
+  .delta .pill{background:#EAF7E2;color:#2C6B12;border-radius:999px;padding:3px 10px;font-family:var(--sans);font-weight:700}
+  .delta .pill.worse{background:#FBEADF;color:var(--warn)}
+  .note{font-size:13.5px;color:var(--ink-2);max-width:44ch}
+  .note b{color:var(--ink)}
+  .split{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;border-top:1px solid var(--rule);padding-top:20px;margin-top:22px}
+  .split div span{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--ink-3);margin-bottom:4px}
+  .split div b{font:800 26px/1 var(--sans);letter-spacing:-.03em;display:block}
+  .split div.miss b{color:var(--warn)}
+
+  /* ---------- chart ---------- */
+  .chartband{padding:38px 0 30px;border-bottom:1px solid var(--rule)}
+  .bandhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .bandhead h2{font-size:19px;font-weight:800;letter-spacing:-.02em}
+  .bandhead span{font-size:13px;color:var(--ink-3)}
+  .chartbox{position:relative;margin-top:18px}
+  svg.chart{display:block;width:100%;height:150px;overflow:visible}
+  .axis{display:flex;justify-content:space-between;font:500 11.5px var(--mono);color:var(--ink-3);margin-top:8px}
+  #cursor{position:absolute;top:0;bottom:22px;width:1px;background:var(--ink-3);opacity:0;pointer-events:none;transition:opacity .12s}
+  #readout{
+    position:absolute;top:-6px;transform:translateX(-50%);background:var(--ink);color:#fff;
+    font:600 12px var(--sans);border-radius:6px;padding:6px 10px;opacity:0;pointer-events:none;
+    white-space:nowrap;transition:opacity .12s;z-index:5
+  }
+  #readout.on,#cursor.on{opacity:1}
+
+  /* ---------- rows (accordion) ---------- */
+  .rowsband{padding:34px 0;border-bottom:1px solid var(--rule)}
+  .row{border-top:1px solid var(--rule)}
+  .row:last-child{border-bottom:1px solid var(--rule)}
+  .rowhead{
+    display:grid;grid-template-columns:minmax(0,1fr) 88px 128px 22px;gap:16px;align-items:center;
+    width:100%;background:none;border:0;text-align:left;cursor:pointer;color:inherit;
+    font-family:inherit;padding:16px 4px;
+  }
+  @media (max-width:640px){.rowhead{grid-template-columns:minmax(0,1fr) 64px 22px}}
+  .rowhead:hover{background:#F1EFE7}
+  .rowhead .nm{font-size:15.5px;font-weight:600}
+  .rowhead .rf{font:500 11.5px var(--mono);color:var(--ink-3);display:block;margin-top:3px}
+  .rowhead .ct{font:800 21px/1 var(--sans);text-align:right;letter-spacing:-.02em}
+  .track{height:7px;background:#E7E5DB;border-radius:999px;overflow:hidden}
+  .fill{display:block;height:100%;background:var(--navy);width:0;border-radius:999px;transition:width .7s cubic-bezier(.16,1,.3,1)}
+  .fill.top{background:var(--laser)}
+  .chev{transition:transform .24s cubic-bezier(.16,1,.3,1);color:var(--ink-3)}
+  .rowhead[aria-expanded=true] .chev{transform:rotate(180deg)}
+  .rowbody{display:none;padding:2px 4px 20px}
+  .rowbody.open{display:block}
+  .items{display:grid;gap:0}
+  .items li{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;
+    padding:10px 0;border-top:1px dashed var(--rule);list-style:none;font-size:14px;
+  }
+  .items li:first-child{border-top:0}
+  .items .state{font:600 11.5px var(--mono);color:var(--ink-3);white-space:nowrap}
+  .items .state.late{color:var(--warn)}
+  @media (prefers-reduced-motion:reduce){.fill,.chev{transition:none}}
+
+  /* ---------- projects ---------- */
+  .projband{padding:34px 0 8px}
+  .prow{display:grid;grid-template-columns:minmax(0,1fr) repeat(3,96px);gap:18px;align-items:baseline;padding:18px 4px;border-top:1px solid var(--rule)}
+  .prow:last-child{border-bottom:1px solid var(--rule)}
+  @media (max-width:640px){.prow{grid-template-columns:minmax(0,1fr) repeat(2,70px)}.prow .c3{display:none}}
+  .prow .pn{font-size:16px;font-weight:600}
+  .prow .pr{font:500 11.5px var(--mono);color:var(--ink-3);display:block;margin-top:3px}
+  .prow .v{text-align:right}
+  .prow .v b{font:800 24px/1 var(--sans);letter-spacing:-.03em;display:block}
+  .prow .v span{font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3)}
+  .prow .v.hot b{color:var(--warn)}
+  .prow.empty .pn{color:var(--ink-3)}
+  footer{padding:26px 0 60px;font-size:12.5px;color:var(--ink-3);max-width:78ch}
+  footer b{color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="mock-note"><b>DESIGN MOCKUP</b> - not the live product. Figures are sample data. Variant 2 of 3: "Ledger".</div>
+
+<div class="wrap">
+  <div class="mast">
+    <div class="mark">instruct<i>Brain</i></div>
+    <div class="who">Organisation <b>instructSite</b> &nbsp;|&nbsp; <span id="stamp">all time</span></div>
+  </div>
+
+  <h1>Everything still open, at a glance.</h1>
+  <p class="standfirst">
+    One page a director can read in ten seconds. Nothing here needs a legend, and
+    nothing is hidden behind a filter you have to remember you set.
+  </p>
+
+  <div class="window">
+    <span class="lbl">Period</span>
+    <div class="seg" role="group" aria-label="Period">
+      <button type="button" data-w="week" aria-pressed="false">7 days</button>
+      <button type="button" data-w="month" aria-pressed="false">30 days</button>
+      <button type="button" data-w="quarter" aria-pressed="false">90 days</button>
+      <button type="button" data-w="all" aria-pressed="true">All time</button>
+    </div>
+    <span class="lbl" id="wcount">22 reports in range</span>
+  </div>
+
+  <!-- hero figure -->
+  <section class="hero" aria-labelledby="open-h">
+    <div>
+      <div class="figlabel" id="open-h">Items still open</div>
+      <div class="bigfig"><span id="h-open">0</span><span class="u">items</span></div>
+      <div class="delta">
+        <span class="pill worse" id="h-pill">12 overdue</span>
+        <span id="h-line">oldest is 11 days past its date</span>
+      </div>
+    </div>
+    <div>
+      <p class="note">
+        <b id="h-caption"></b>
+      </p>
+      <div class="split">
+        <div><span>Reports</span><b id="h-reports">0</b></div>
+        <div><span>Closed out</span><b id="h-closed">0</b></div>
+        <div class="miss"><span>Overdue</span><b id="h-overdue">0</b></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- chart -->
+  <section class="chartband" aria-labelledby="trend-h">
+    <div class="bandhead">
+      <h2 id="trend-h">Reports raised</h2>
+      <span>by week, hover the line</span>
+    </div>
+    <p style="font-size:13.5px;color:var(--ink-2);max-width:60ch">
+      The product is new, so this line is short by design. It is drawn from real dates,
+      never padded with zeroes to look busier than it is.
+    </p>
+    <div class="chartbox">
+      <svg class="chart" id="chart" preserveAspectRatio="none" aria-hidden="true"></svg>
+      <div id="cursor"></div>
+      <div id="readout"></div>
+    </div>
+    <div class="axis" id="axis"></div>
+  </section>
+
+  <!-- survey types -->
+  <section class="rowsband" aria-labelledby="types-h">
+    <div class="bandhead">
+      <h2 id="types-h">Open items by survey</h2>
+      <span>click a row for the items inside</span>
+    </div>
+    <div id="rows"></div>
+  </section>
+
+  <!-- projects -->
+  <section class="projband" aria-labelledby="proj-h">
+    <div class="bandhead">
+      <h2 id="proj-h">Projects</h2>
+      <span>including the ones with nothing on them</span>
+    </div>
+    <div id="projects"></div>
+  </section>
+
+  <footer>
+    <b>How the numbers are counted.</b> An item is open until it reaches a verified or closed state;
+    overdue means open with a date that has passed. Figures include any demo or test data on the
+    account and do not quietly filter it. Sample data shaped from live instructBrain records.
+  </footer>
+</div>
+
+<script>
+/* ---------- sample data, shaped from live records ---------- */
+const W = { week: 0.30, month: 0.66, quarter: 0.86, all: 1 };
+const TYPES = [
+  { name:"Property inventory and schedule of condition", ref:"DEMO-INV-001", items:29,
+    list:[["Kitchen extract - filter not fitted","open, 6 days late"],["En-suite sealant perished at tray","open"],["Entrance door closer out of adjustment","assigned"],["Bath panel fixing loose","open"]] },
+  { name:"Electrical installation condition", ref:"EIC-2026-10-001", items:18,
+    list:[["Circuit chart not at the board","open, 2 days late"],["Distribution board 2 - cover missing","assigned"],["Bonding to water incomer not labelled","open"]] },
+  { name:"Fit-out and finishes quality", ref:"DEMO-FQ-001", items:17,
+    list:[["Skirting mitre open at 12mm","open"],["Ceiling grid level out by 9mm over 4m","assigned"],["Door swing clashes with radiator","open"]] },
+  { name:"Mechanical and HVAC installation", ref:"DEMO-MS-001", items:14,
+    list:[["AHU access panel fouling pipework","open, 8 days late"],["Condensate trap not primed","open"]] },
+  { name:"Damp, mould and water ingress", ref:"DEMO-DM-001", items:13,
+    list:[["Mould to rear bedroom ceiling","open"],["Rising damp at skirting, hall","assigned"]] },
+  { name:"Site condition", ref:"DEMO-SC-001", items:12,
+    list:[["Edge protection - end stop missing","open, 11 days late"],["Dust sheet torn at landing","open"]] }
+];
+const PROJECTS = [
+  { name:"Demonstration property - London", ref:"DEMO-001", reports:18, open:101, overdue:9 },
+  { name:"Riverside Court - Cat B Fit-Out, Phase 2", ref:"HCE-2417", reports:2, open:13, overdue:3 },
+  { name:"instructSiteTEST", ref:"Production", reports:0, open:0, overdue:0, empty:true }
+];
+const WEEKS = [
+  { label:"17 Aug", reports:2 }, { label:"24 Aug", reports:3 }, { label:"31 Aug", reports:5 },
+  { label:"7 Sep",  reports:4 }, { label:"14 Sep", reports:6 }, { label:"21 Sep", reports:3 },
+  { label:"28 Sep", reports:7 }, { label:"5 Oct",  reports:9 }
+];
+
+let win = "all";
+const nf = new Intl.NumberFormat("en-GB");
+const $ = (id) => document.getElementById(id);
+const s = (n) => Math.max(n === 0 ? 0 : 1, Math.round(n * W[win]));
+
+function totals(){
+  return {
+    reports: s(20),
+    open: s(114),
+    closed: s(19),
+    overdue: s(12)
+  };
+}
+
+function render(){
+  const t = totals();
+  $("h-open").textContent = nf.format(t.open);
+  $("h-reports").textContent = nf.format(t.reports);
+  $("h-closed").textContent = nf.format(t.closed);
+  $("h-overdue").textContent = nf.format(t.overdue);
+  $("h-pill").textContent = nf.format(t.overdue) + " overdue";
+  $("wcount").textContent = nf.format(t.reports) + " reports in range";
+  $("stamp").textContent = { week:"last 7 days", month:"last 30 days", quarter:"last 90 days", all:"all time" }[win];
+
+  const pct = t.open + t.closed ? Math.round((t.closed / (t.open + t.closed)) * 100) : 0;
+  $("h-caption").textContent =
+    "Two of the three projects carry reports, " + nf.format(t.open) + " items still to close, " + pct +
+    "% of everything raised has been signed off. The busiest survey type is property inventory.";
+
+  // rows
+  const max = Math.max(...TYPES.map(x => x.items));
+  $("rows").innerHTML = TYPES.map((x, i) => {
+    const v = s(x.items);
+    const fill = ((v / Math.max(1, s(max))) * 100).toFixed(1);
+    return '<div class="row">' +
+      '<button type="button" class="rowhead" aria-expanded="false" data-row="' + i + '">' +
+        '<span><span class="nm">' + x.name + '</span><span class="rf">' + x.ref + '</span></span>' +
+        '<span class="ct">' + v + '</span>' +
+        '<span class="track"><span class="fill' + (i === 0 ? ' top' : '') + '" data-w="' + fill + '"></span></span>' +
+        '<svg class="chev" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>' +
+      '</button>' +
+      '<div class="rowbody" id="rb-' + i + '"><ul class="items">' +
+        x.list.map(li => '<li><span>' + li[0] + '</span><span class="state' +
+          (li[1].indexOf("late") > -1 ? ' late' : '') + '">' + li[1] + '</span></li>').join("") +
+      '</ul></div></div>';
+  }).join("");
+  requestAnimationFrame(() => {
+    document.querySelectorAll(".fill").forEach(el => { el.style.width = el.getAttribute("data-w") + "%"; });
+  });
+
+  // projects
+  $("projects").innerHTML = PROJECTS.map(p =>
+    '<div class="prow' + (p.empty ? ' empty' : '') + '">' +
+      '<div><span class="pn">' + p.name + '</span><span class="pr">' + p.ref + '</span></div>' +
+      '<div class="v"><b>' + nf.format(s(p.reports)) + '</b><span>reports</span></div>' +
+      '<div class="v"><b>' + nf.format(s(p.open)) + '</b><span>open</span></div>' +
+      '<div class="v hot c3"><b>' + nf.format(s(p.overdue)) + '</b><span>overdue</span></div>' +
+    '</div>').join("");
+
+  drawChart();
+}
+
+/* ---------- chart: drawn from the data, not decorated ---------- */
+function drawChart(){
+  const svg = $("chart");
+  const box = svg.getBoundingClientRect();
+  const w = box.width || 900, h = 150, pad = 8;
+  const max = Math.max(...WEEKS.map(d => d.reports), 1);
+  const pts = WEEKS.map((d, i) => {
+    const x = pad + (i * (w - pad * 2)) / (WEEKS.length - 1);
+    const y = h - pad - (d.reports / max) * (h - pad * 2 - 12);
+    return [x, y];
+  });
+  const line = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+  const area = line + " L" + pts[pts.length-1][0].toFixed(1) + " " + h + " L" + pts[0][0].toFixed(1) + " " + h + " Z";
+  svg.setAttribute("viewBox", "0 0 " + w + " " + h);
+  svg.innerHTML =
+    '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="#24417B" stop-opacity=".22"/>' +
+      '<stop offset="100%" stop-color="#24417B" stop-opacity="0"/>' +
+    '</linearGradient></defs>' +
+    '<path d="' + area + '" fill="url(#g)"/>' +
+    '<path d="' + line + '" fill="none" stroke="#24417B" stroke-width="2.2" stroke-linejoin="round"/>' +
+    pts.map(p => '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3.4" fill="#fff" stroke="#24417B" stroke-width="2"/>').join("");
+  $("axis").innerHTML = WEEKS.map(d => "<span>" + d.label + "</span>").join("");
+  svg._pts = pts;
+  svg._w = w;
+  svg._h = h;
+}
+
+/* hover crosshair */
+const chart = $("chart");
+chart.parentElement.addEventListener("mousemove", (e) => {
+  const pts = chart._pts; if (!pts) return;
+  const r = chart.getBoundingClientRect();
+  const x = e.clientX - r.left;
+  let best = 0, bestd = 1e9;
+  pts.forEach((p, i) => { const d = Math.abs(p[0] * (r.width / (chart._w || r.width)) - x); if (d < bestd){ bestd = d; best = i; } });
+  const scale = r.width / (chart._w || r.width);
+  const px = pts[best][0] * scale;
+  $("cursor").style.left = px + "px";
+  $("cursor").classList.add("on");
+  const ro = $("readout");
+  ro.style.left = Math.min(r.width - 60, Math.max(40, px)) + "px";
+  ro.textContent = WEEKS[best].label + " - " + WEEKS[best].reports + " reports";
+  ro.classList.add("on");
+});
+chart.parentElement.addEventListener("mouseleave", () => {
+  $("cursor").classList.remove("on"); $("readout").classList.remove("on");
+});
+
+/* interactions */
+document.addEventListener("click", (e) => {
+  const head = e.target.closest(".rowhead");
+  if (head){
+    const i = head.getAttribute("data-row");
+    const body = $("rb-" + i);
+    const open = head.getAttribute("aria-expanded") === "true";
+    head.setAttribute("aria-expanded", String(!open));
+    body.classList.toggle("open", !open);
+  }
+  const wbtn = e.target.closest("button[data-w]");
+  if (wbtn){
+    win = wbtn.getAttribute("data-w");
+    document.querySelectorAll("button[data-w]").forEach(b => b.setAttribute("aria-pressed", String(b === wbtn)));
+    render();
+  }
+});
+window.addEventListener("resize", () => { drawChart(); });
+render();
+</script>
+</body>
+</html>

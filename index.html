@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>instructBrain dashboard - three directions (design mockups)</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#24417B;--ink:#0E1930;--ink-2:#4B5871;--ink-3:#8B94A6;
+    --laser:#57FF00;--paper:#F7F7F3;--card:#fff;--rule:#DFDCD2;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  body{font-family:var(--sans);background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+  header{background:var(--navy);color:#fff;padding:20px 0}
+  header .wrap{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+  .mark{font-size:18px;font-weight:800;letter-spacing:-.02em}
+  .mark i{font-style:normal;color:var(--laser)}
+  header .tag{margin-left:auto;font-size:12px;opacity:.85}
+
+  h1{font-size:clamp(25px,4.2vw,42px);line-height:1.05;letter-spacing:-.035em;font-weight:800;margin:32px 0 10px;max-width:22ch}
+  .lede{font-size:15.5px;color:var(--ink-2);max-width:74ch;margin-bottom:14px}
+  .lede b{color:var(--ink)}
+  .howto{background:#FFF8E1;border:1px solid #E8D9A0;border-radius:10px;padding:13px 16px;font-size:13.5px;margin:18px 0 6px;max-width:82ch}
+  .howto b{color:var(--ink)}
+
+  /* tabs */
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:26px 0 12px}
+  .tab{
+    appearance:none;cursor:pointer;font:700 13.5px var(--sans);color:var(--ink-2);
+    background:#EFEDE4;border:1px solid var(--rule);border-bottom:0;
+    border-radius:10px 10px 0 0;padding:11px 16px;
+  }
+  .tab[aria-selected=true]{background:var(--card);color:var(--navy);border-color:var(--navy);position:relative;z-index:2}
+  .tab span{display:block;font-weight:500;font-size:11.5px;color:var(--ink-3);margin-top:2px}
+  .frame{background:var(--card);border:1px solid var(--navy);border-radius:0 12px 12px 12px;overflow:hidden}
+  .fbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--rule);background:#FAFAF7}
+  .fbar .fname{font-weight:700;font-size:13.5px}
+  .fbar .fnote{font-size:12.5px;color:var(--ink-2)}
+  .fbar a{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--navy);text-decoration:none;border:1px solid var(--navy);border-radius:8px;padding:7px 12px;white-space:nowrap}
+  iframe{display:block;width:100%;height:74vh;min-height:520px;border:0;background:#fff}
+  .hint{font-size:12.5px;color:var(--ink-3);margin-top:8px}
+
+  /* comparison */
+  h2{font-size:20px;letter-spacing:-.02em;font-weight:800;margin:44px 0 12px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--card);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3);background:#FAFAF7}
+  tr:last-child td{border-bottom:0}
+  td:first-child{font-weight:600;color:var(--ink-2);width:22%}
+  .pick{background:#F3FBF0}
+  .verdict{background:var(--card);border:1px solid var(--rule);border-left:4px solid var(--laser);border-radius:12px;padding:20px 22px;margin-top:8px}
+  .verdict h3{font-size:17px;letter-spacing:-.02em;margin-bottom:8px}
+  .verdict p{font-size:14px;color:var(--ink-2);margin-bottom:10px;max-width:80ch}
+  .verdict ul{margin:0 0 6px 18px;font-size:14px;color:var(--ink-2)}
+  .verdict li{margin-bottom:6px}
+  details{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;margin-top:12px}
+  summary{font-weight:700;font-size:14px;cursor:pointer}
+  details p,details li{font-size:13.5px;color:var(--ink-2);margin-top:8px}
+  details ul{margin-left:18px}
+  footer{padding:34px 0 60px;font-size:12.5px;color:var(--ink-3);max-width:84ch}
+  footer b{color:var(--ink-2)}
+  @media (max-width:760px){iframe{height:60vh;min-height:420px}.tab span{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="mark">instruct<i>Brain</i></div>
+    <div class="tag">Dashboard design options - 11 Oct 2026</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <h1>Three directions for the dashboard.</h1>
+  <p class="lede">
+    Same data, three different beliefs about what a dashboard is <b>for</b>. They are not colour
+    variations - each one is a separate argument. All three are clickable: hover the charts, click a
+    row, drag across the little squares, switch the grouping.
+  </p>
+  <p class="howto">
+    <b>On a phone:</b> the tab shows a desktop screen shrunk to fit, so use <b>Open on its own</b> for
+    the full thing. All three are built with the product's own colours, so what you see is what the
+    real screen can be - not a picture of a different product.
+  </p>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-t="0" aria-selected="true">1. Control Room<span>dense, dark, instrument</span></button>
+    <button class="tab" role="tab" data-t="1" aria-selected="false">2. Ledger<span>calm, light, board-ready</span></button>
+    <button class="tab" role="tab" data-t="2" aria-selected="false">3. Blueprint grid<span>the item map - most interactive</span></button>
+  </div>
+
+  <div class="frame">
+    <div class="fbar">
+      <span class="fname" id="f-name">1. Control Room</span>
+      <span class="fnote" id="f-note">Everything on one screen, readouts and a live instrument.</span>
+      <a id="f-open" href="001-control-room/" target="_blank" rel="noopener">Open on its own</a>
+    </div>
+    <iframe id="f-frame" src="001-control-room/" title="Control Room mockup" loading="lazy"></iframe>
+  </div>
+  <p class="hint">Every variant is a single self-contained page with no build step, so it will open on any phone or laptop.</p>
+
+  <h2>Head to head</h2>
+  <table>
+    <thead>
+      <tr><th></th><th>1. Control Room</th><th>2. Ledger</th><th>3. Blueprint grid</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Feels like</td><td>A control room</td><td>A board paper</td><td>A site drawing you can touch</td></tr>
+      <tr><td>Density</td><td>High</td><td>Low</td><td>Medium, then high</td></tr>
+      <tr><td>Read in 5 seconds</td><td>Yes, if you know your own screen</td><td>Yes, with no training</td><td class="pick">Yes, and it survives a glance from across the room</td></tr>
+      <tr><td>Answers "where is the weight?"</td><td>Partly - totals tell you what, not where</td><td>No - one project hides behind a total</td><td class="pick">Yes - that is the whole point</td></tr>
+      <tr><td>Interactive</td><td>Scope switch, time window, hover, live clock</td><td>Period control, chart crosshair, expanding rows</td><td class="pick">Hover, click-to-open, drag-select a region, regroup three ways</td></tr>
+      <tr><td>Shows an unassessed item</td><td>No</td><td>No</td><td class="pick">Yes - dashed squares, counted separately</td></tr>
+      <tr><td>Best room for it</td><td>Site office, big screen</td><td>Client meeting</td><td>Anywhere, and it is the demo piece</td></tr>
+      <tr><td>Risk</td><td>Noisy on a phone</td><td>Under-whelming if the data is thin</td><td>Needs a legend, so it must stay simple</td></tr>
+      <tr><td>Build cost</td><td>Medium</td><td>Low</td><td>Highest, but nothing exotic</td></tr>
+    </tbody>
+  </table>
+
+  <h2>What I would do</h2>
+  <div class="verdict">
+    <h3>Lead with 3, keep 2 underneath it.</h3>
+    <p>
+      The grid is the one people have not seen. It answers a question your competitors' dashboards
+      cannot - <b>where</b> the open items actually are, and how many nobody has even looked at - and
+      the drag-select turns it from a picture into a tool, because you pull a set out and build a
+      document from them. That is the moment someone says "I have not seen that before".
+    </p>
+    <ul>
+      <li><b>The bar it has to clear:</b> a director must understand it without being taught. The legend and the "needs attention now" list underneath are what make that work.</li>
+      <li><b>Why keep the Ledger too:</b> it is the one you hand to a client or put in a meeting pack. It needs no explanation at all. Cheap to build once the numbers exist.</li>
+      <li><b>My honest read on 1:</b> it looks the most impressive in a screenshot, but the density hurts on a phone and it hides the unassessed items. It is the best <em>look</em>, not the best <em>tool</em>.</li>
+    </ul>
+  </div>
+
+  <details>
+    <summary>The one thing that shapes all three (and it is not visual)</summary>
+    <p>
+      I checked the live data before designing anything. <b>Every item in the account is from
+      October 2026.</b> The product is about a month old, so a six-month trend chart draws one spike
+      and five flat months - it looks broken while being perfectly truthful.
+    </p>
+    <p>
+      That is why variant 2 says out loud that the line is short by design, and why the grid earns its
+      place: with a month of data, a map reads as full, while a trend line reads as empty. When you
+      demo to a prospect with two reports on their account, the map will still look alive and a chart
+      will not.
+    </p>
+    <p>
+      It also means every one of these needs a real empty state - a brand new account has zero of
+      everything, and that is the state a prospect sees first.
+    </p>
+  </details>
+
+  <details>
+    <summary>What is real here, and what is not</summary>
+    <p>
+      These are <b>design mockups, not the product</b>. The figures are sample data, shaped from your
+      real records: the project names, the reference formats (DEMO-001, HCE-2417, EIC-2026-10-001)
+      and the survey types are lifted from the live database. The item counts and states are
+      illustrative.
+    </p>
+    <p>
+      Nothing has been published to the product, and nothing will be without you saying so first.
+      The colours are the product's own tokens - navy #24417B and Laser Green #57FF00 - so a chosen
+      direction can be built with the existing design system rather than bolted on.
+    </p>
+  </details>
+
+  <footer>
+    <b>Built by Banksy</b> for Dal, 11 Oct 2026. Three stances, deliberately pulled apart:
+    instrument / editorial / map.
+  </footer>
+</div>
+
+<script>
+const VARIANTS = [
+  { name:"1. Control Room", note:"Everything on one screen, readouts and a live instrument.", dir:"001-control-room/" },
+  { name:"2. Ledger", note:"Calm and type-led. The one you could put in front of a client.", dir:"002-ledger/" },
+  { name:"3. Blueprint grid", note:"Every item as a square. Hover, click, drag-select, regroup.", dir:"003-blueprint-grid/" }
+];
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    const i = Number(tab.getAttribute("data-t"));
+    document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", String(t === tab)));
+    document.getElementById("f-name").textContent = VARIANTS[i].name;
+    document.getElementById("f-note").textContent = VARIANTS[i].note;
+    document.getElementById("f-open").setAttribute("href", VARIANTS[i].dir);
+    document.getElementById("f-frame").setAttribute("src", VARIANTS[i].dir);
+    document.getElementById("f-frame").setAttribute("title", VARIANTS[i].name + " mockup");
+  });
+});
+</script>
+</body>
+</html>

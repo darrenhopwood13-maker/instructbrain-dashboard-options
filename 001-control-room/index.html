@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variant 1 - Control Room (design mockup)</title>
+<style>
+  /* ============================================================
+     VARIANT 1 - "CONTROL ROOM"
+     Stance: the dashboard is an INSTRUMENT, not a page.
+     Dark ground, hairline rules instead of card boxes, monospaced
+     numerals that don't shift width, one accent (Laser Green) used
+     only where the eye must land. Dense: everything above the fold.
+     ============================================================ */
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#24417B;
+    --ink:#080E1C;
+    --ink-2:#0D1730;
+    --ink-3:#132043;
+    --laser:#57FF00;
+    --paper:#F7F7F3;
+    --dim:#7C8AA8;
+    --dim-2:#9AA7C0;
+    --rule:rgba(154,167,192,.18);
+    --warn:#FF8A3D;
+    --bad:#FF4D5E;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  body{
+    font-family:var(--sans);background:var(--ink);color:var(--paper);
+    -webkit-font-smoothing:antialiased;line-height:1.4;
+    min-height:100vh;padding:0 0 72px;
+    display:flex;flex-direction:column;
+  }
+  .mock-note{
+    background:var(--laser);color:#062100;font:600 12px/1.4 var(--sans);
+    text-align:center;padding:6px 12px;letter-spacing:.01em;
+  }
+  .mock-note b{font-weight:800}
+
+  /* ---------- header strip ---------- */
+  header{
+    display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+    padding:14px 22px;border-bottom:1px solid var(--rule);background:var(--ink-2);
+  }
+  .mark{font-size:19px;font-weight:800;letter-spacing:-.02em}
+  .mark i{font-style:normal;color:var(--laser)}
+  .hstrip{margin-left:auto;display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+  .hcell{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim)}
+  .hcell b{display:block;font:600 14px var(--mono);color:var(--paper);letter-spacing:0;text-transform:none;margin-top:2px}
+  .live{display:inline-flex;align-items:center;gap:7px}
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--laser);animation:pulse 2.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+  @media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+
+  /* ---------- scope bar ---------- */
+  .scope{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    padding:12px 22px;border-bottom:1px solid var(--rule);
+  }
+  .scope .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim)}
+  .seg{display:inline-flex;border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+  .seg button{
+    appearance:none;background:none;border:0;color:var(--dim-2);
+    font:600 12px var(--sans);padding:7px 13px;cursor:pointer;border-right:1px solid var(--rule);
+  }
+  .seg button:last-child{border-right:0}
+  .seg button[aria-pressed=true]{background:var(--laser);color:#062100}
+  .seg button:hover:not([aria-pressed=true]){background:var(--ink-3);color:var(--paper)}
+  #wseg-slot{display:inline-flex}
+  #scope-name{color:var(--laser);font-weight:700}
+
+  /* ---------- instrument grid ---------- */
+  main{display:grid;grid-template-columns:236px minmax(0,1fr) 300px;gap:0;align-items:stretch;flex:1 0 auto}
+  @media (max-width:1080px){main{grid-template-columns:1fr}}
+  .col{padding:20px 22px;border-right:1px solid var(--rule);min-width:0}
+  .col:last-child{border-right:0}
+  @media (max-width:1080px){.col{border-right:0;border-bottom:1px solid var(--rule)}}
+
+  .ctitle{
+    font-size:10.5px;text-transform:uppercase;letter-spacing:.16em;color:var(--dim);
+    display:flex;justify-content:space-between;gap:8px;margin-bottom:12px;
+  }
+
+  /* readout tiles: no boxes, hairlines only */
+  .read{padding:12px 0;border-bottom:1px solid var(--rule)}
+  .read:first-of-type{padding-top:0}
+  .read .k{font-size:11px;color:var(--dim-2);letter-spacing:.02em}
+  .read .v{font:700 40px/1 var(--mono);letter-spacing:-.03em;margin:5px 0 3px}
+  .read .v.hot{color:var(--laser)}
+  .read .d{font:500 11px var(--mono);color:var(--dim)}
+  .read .d.up{color:var(--warn)}
+  .spark{display:block;margin-top:7px;opacity:.85}
+
+  /* gauge */
+  .gauge{display:flex;align-items:center;gap:22px;padding-bottom:16px;border-bottom:1px solid var(--rule)}
+  .gwrap{position:relative;width:152px;height:152px;flex:0 0 auto}
+  .gwrap svg{transform:rotate(-90deg)}
+  .gnum{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  }
+  .gnum b{font:700 34px/1 var(--mono);letter-spacing:-.03em}
+  .gnum span{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim);margin-top:5px}
+  .glegend{font-size:12px;color:var(--dim-2);display:grid;gap:9px;min-width:0}
+  .glegend div{display:flex;align-items:center;gap:8px}
+  .swatch{width:9px;height:9px;border-radius:2px;flex:0 0 auto}
+  .glegend b{font:600 13px var(--mono);color:var(--paper);margin-left:auto}
+
+  /* bars */
+  .bars{margin-top:16px;display:grid;gap:11px}
+  .bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;cursor:pointer}
+  .bar .n{font-size:12.5px;color:var(--dim-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar:hover .n{color:var(--paper)}
+  .bar .c{font:600 12.5px var(--mono);color:var(--paper)}
+  .track{grid-column:1/-1;display:block;height:6px;background:var(--ink-3);border-radius:3px;overflow:hidden}
+  /* display:block matters: as a bare <span> the fill stays inline and width/height
+     are both ignored, so every bar renders empty. */
+  .fill{display:block;height:100%;background:var(--laser);width:0;transition:width .7s cubic-bezier(.16,1,.3,1)}
+  @media (prefers-reduced-motion:reduce){.fill{transition:none}}
+  .fill.alt{background:var(--navy)}
+
+  /* project list */
+  .proj{
+    text-align:left;width:100%;background:none;border:0;border-bottom:1px solid var(--rule);
+    padding:11px 9px;cursor:pointer;color:inherit;font-family:inherit;display:grid;gap:4px;
+    border-left:2px solid transparent;
+  }
+  .proj:hover{background:var(--ink-2)}
+  .proj[aria-current=true]{border-left-color:var(--laser);background:var(--ink-2)}
+  .proj .pn{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .proj .pm{font:500 11px var(--mono);color:var(--dim);display:flex;gap:11px;flex-wrap:wrap}
+  .proj .pm em{font-style:normal;color:var(--dim-2)}
+  .proj .pm .warn{color:var(--warn)}
+
+  /* ticker */
+  .ticker{
+    position:fixed;left:0;right:0;bottom:0;background:var(--ink-2);border-top:1px solid var(--rule);
+    display:flex;align-items:center;gap:14px;padding:10px 22px;overflow:hidden;font-size:12.5px;
+  }
+  .ticker .tag{
+    flex:0 0 auto;font:700 10.5px var(--sans);text-transform:uppercase;letter-spacing:.14em;
+    color:var(--bad);border:1px solid var(--bad);border-radius:3px;padding:3px 7px;
+  }
+  .ticker .clip{
+    flex:1;min-width:0;overflow:hidden;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent);
+    mask-image:linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent);
+  }
+  .ticker .run{display:flex;gap:34px;white-space:nowrap;padding-left:30px;animation:slide 44s linear infinite;width:max-content}
+  @keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @media (prefers-reduced-motion:reduce){.ticker .run{animation:none;overflow-x:auto}}
+  .ticker .run span{color:var(--dim-2)}
+  .ticker .run b{color:var(--paper);font-weight:600}
+  .ticker .run i{font-style:normal;color:var(--bad)}
+
+  /* tooltip */
+  #tip{
+    position:fixed;pointer-events:none;background:var(--paper);color:var(--ink);
+    font:600 12px var(--sans);padding:7px 10px;border-radius:4px;opacity:0;transition:opacity .12s;
+    z-index:50;max-width:260px;box-shadow:0 12px 28px rgba(0,0,0,.45)
+  }
+  #tip.on{opacity:1}
+  footer{padding:16px 22px;font-size:11.5px;color:var(--dim);border-top:1px solid var(--rule);margin-top:8px}
+</style>
+</head>
+<body>
+<div class="mock-note"><b>DESIGN MOCKUP</b> - not the live product. Figures are sample data. Variant 1 of 3: "Control Room".</div>
+
+<header>
+  <div class="mark">instruct<i>Brain</i></div>
+  <div class="hstrip">
+    <div class="hcell">Organisation<b id="h-org">instructSite</b></div>
+    <div class="hcell">Window<b id="h-window">All time</b></div>
+    <div class="hcell live">Data<b><span class="pulse"></span> <span id="h-clock">--:--:--</span></b></div>
+  </div>
+</header>
+
+<div class="scope">
+  <span class="lbl">Scope</span>
+  <div class="seg" role="group" aria-label="Scope">
+    <button type="button" id="s-all" aria-pressed="true">All projects</button>
+    <button type="button" id="s-one" aria-pressed="false">Selected project</button>
+  </div>
+  <span id="wseg-slot"></span>
+  <span class="lbl">Showing</span><span id="scope-name">instructSite (3 projects)</span>
+</div>
+
+<main>
+  <!-- LEFT: instrument readings -->
+  <section class="col" aria-label="Readings">
+    <div class="ctitle"><span>Readings</span><span id="rail-window">All time</span></div>
+    <div class="read">
+      <div class="k">Reports</div>
+      <div class="v" id="r-reports">0</div>
+      <div class="d" id="d-reports">-</div>
+      <svg class="spark" width="176" height="26" viewBox="0 0 176 26" aria-hidden="true"><polyline id="sp-reports" fill="none" stroke="#57FF00" stroke-width="2" points=""/></svg>
+    </div>
+    <div class="read">
+      <div class="k">Items</div>
+      <div class="v" id="r-items">0</div>
+      <div class="d" id="d-items">-</div>
+      <svg class="spark" width="176" height="26" viewBox="0 0 176 26" aria-hidden="true"><polyline id="sp-items" fill="none" stroke="#9AA7C0" stroke-width="2" points=""/></svg>
+    </div>
+    <div class="read">
+      <div class="k">Overdue</div>
+      <div class="v hot" id="r-overdue">0</div>
+      <div class="d up" id="d-overdue">-</div>
+      <svg class="spark" width="176" height="26" viewBox="0 0 176 26" aria-hidden="true"><polyline id="sp-overdue" fill="none" stroke="#FF8A3D" stroke-width="2" points=""/></svg>
+    </div>
+    <div class="read" style="border-bottom:0">
+      <div class="k">Projects</div>
+      <div class="v" id="r-projects">0</div>
+      <div class="d" id="d-projects">-</div>
+    </div>
+  </section>
+
+  <!-- CENTRE: the instrument -->
+  <section class="col" aria-label="Breakdown">
+    <div class="ctitle"><span>Close-out</span><span id="c-scope">all projects</span></div>
+    <div class="gauge">
+      <div class="gwrap">
+        <svg width="152" height="152" aria-hidden="true">
+          <circle cx="76" cy="76" r="64" fill="none" stroke="#132043" stroke-width="13"/>
+          <circle id="arc" cx="76" cy="76" r="64" fill="none" stroke="#57FF00" stroke-width="13"
+                  stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="402"
+                  style="transition:stroke-dashoffset .8s cubic-bezier(.16,1,.3,1)"/>
+        </svg>
+        <div class="gnum"><b id="g-pct">0%</b><span>closed out</span></div>
+      </div>
+      <div class="glegend">
+        <div><span class="swatch" style="background:#57FF00"></span>Closed out <b id="l-closed">0</b></div>
+        <div><span class="swatch" style="background:#24417B"></span>Open - assigned <b id="l-assigned">0</b></div>
+        <div><span class="swatch" style="background:#FF8A3D"></span>Open - unassigned <b id="l-open">0</b></div>
+        <div><span class="swatch" style="background:#FF4D5E"></span>Overdue <b id="l-overdue">0</b></div>
+        <div style="border-top:1px solid var(--rule);padding-top:9px;margin-top:2px">
+          <span style="color:var(--dim)">Still to close</span><b id="l-toclose">0</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="ctitle" style="margin:18px 0 10px"><span>Items by survey type</span><span>hover for detail</span></div>
+    <div class="bars" id="bars"></div>
+  </section>
+
+  <!-- RIGHT: projects -->
+  <section class="col" aria-label="Projects">
+    <div class="ctitle"><span>Projects</span><span id="p-count">0</span></div>
+    <div id="projects"></div>
+    <p style="font-size:11.5px;color:var(--dim);margin-top:12px">
+      Hover a project to preview it. Click to lock the whole instrument to it.
+    </p>
+  </section>
+</main>
+
+<footer>
+  Sample data shaped from live instructBrain records (project names, reference formats and survey types).
+  A project with no reports is kept in the list on purpose: the empty one is the answer to "which job have we not surveyed?".
+</footer>
+
+<div class="ticker" aria-label="Overdue items">
+  <span class="tag">Overdue</span>
+  <div class="clip"><div class="run" id="run"></div></div>
+</div>
+<div id="tip" role="status"></div>
+
+<script>
+/* ---------- sample data, shaped from live records ---------- */
+const WINDOWS = { week: 0.28, month: 0.62, all: 1 };
+const PROJECTS = [
+  { name:"Demonstration property - London", ref:"DEMO-001", reports:18, items:117, open:79, assigned:22, closed:16, overdue:9, last:"2 Oct 2026" },
+  { name:"Riverside Court - Cat B Fit-Out, Phase 2", ref:"HCE-2417", reports:2, items:16, open:9, assigned:4, closed:3, overdue:3, last:"8 Oct 2026" },
+  { name:"instructSiteTEST", ref:"Production", reports:0, items:0, open:0, assigned:0, closed:0, overdue:0, last:"-" }
+];
+const TYPES = [
+  { name:"Property inventory and schedule of condition", ref:"DEMO-INV-001", items:29 },
+  { name:"Electrical installation condition", ref:"EIC-2026-10-001", items:18 },
+  { name:"Fit-out and finishes quality", ref:"DEMO-FQ-001", items:17 },
+  { name:"Mechanical and HVAC installation", ref:"DEMO-MS-001", items:14 },
+  { name:"Damp, mould and water ingress", ref:"DEMO-DM-001", items:13 },
+  { name:"Site condition", ref:"DEMO-SC-001", items:12 },
+  { name:"Manual photographic report", ref:"MPR-2026-10-001", items:11 }
+];
+const OVERDUE = [
+  ["DEMO-EL-001","Distribution board 2 - cover missing","Property inventory","4 days"],
+  ["DEMO-INV-003","Kitchen extract - filter not fitted","Demonstration property","6 days"],
+  ["EIC-2026-10-001","Circuit chart not at the board","Riverside Court","2 days"],
+  ["DEMO-SC-001","Edge protection - end stop missing","Demonstration property","11 days"],
+  ["MPR-2026-10-001","Temporary works tag out of date","Riverside Court","3 days"],
+  ["DEMO-MS-001","AHU access panel fouling pipework","Demonstration property","8 days"]
+];
+
+let windowKey = "all";
+let scope = "all";
+let selected = 0;
+
+const nf = new Intl.NumberFormat("en-GB");
+const $ = (id) => document.getElementById(id);
+
+function scaled(n){ return Math.max(n === 0 ? 0 : 1, Math.round(n * WINDOWS[windowKey])); }
+
+function currentRows(){
+  return scope === "one" ? [PROJECTS[selected]] : PROJECTS;
+}
+
+function sparkline(el, seed, up){
+  const pts = [];
+  let v = 12;
+  for (let i = 0; i < 12; i++){
+    v = Math.max(3, Math.min(23, v + Math.sin((i + seed) * 0.9) * 4 + (up ? -i * 0.35 : i * 0.2)));
+    pts.push((i * 16) + "," + v.toFixed(1));
+  }
+  el.setAttribute("points", pts.join(" "));
+}
+
+function render(){
+  const rows = currentRows();
+  const sum = (k) => rows.reduce((a, p) => a + p[k], 0);
+  const reports = scaled(sum("reports"));
+  const items = scaled(sum("items"));
+  const open = scaled(sum("open"));
+  const assigned = scaled(sum("assigned"));
+  const closed = scaled(sum("closed"));
+  const overdue = scaled(sum("overdue"));
+  const toClose = open + assigned;
+
+  $("r-reports").textContent = nf.format(reports);
+  $("r-items").textContent = nf.format(items);
+  $("r-overdue").textContent = nf.format(overdue);
+  $("r-projects").textContent = rows.length;
+  $("d-reports").textContent = (scope === "one" ? "this project" : rows.length + " projects");
+  $("d-items").textContent = nf.format(assigned) + " allocated to a trade";
+  $("d-overdue").textContent = overdue ? "oldest 11 days" : "nothing past due";
+  $("d-projects").textContent = rows.filter(p => p.reports === 0).length + " with no reports yet";
+
+  $("l-closed").textContent = nf.format(closed);
+  $("l-assigned").textContent = nf.format(assigned);
+  $("l-open").textContent = nf.format(open);
+  $("l-overdue").textContent = nf.format(overdue);
+  $("l-toclose").textContent = nf.format(toClose);
+
+  const pct = items ? Math.round((closed / items) * 100) : 0;
+  $("g-pct").textContent = pct + "%";
+  const C = 2 * Math.PI * 64;
+  $("arc").setAttribute("stroke-dasharray", C.toFixed(0));
+  $("arc").setAttribute("stroke-dashoffset", (C * (1 - pct / 100)).toFixed(0));
+
+  $("h-window").textContent = { week:"This week", month:"This month", all:"All time" }[windowKey];
+  $("rail-window").textContent = { week:"7 days", month:"30 days", all:"All time" }[windowKey];
+  $("scope-name").textContent = scope === "all"
+    ? "instructSite (3 projects)"
+    : rows[0].name + " (" + rows[0].ref + ")";
+  $("c-scope").textContent = scope === "all" ? "all projects" : rows[0].ref;
+  $("p-count").textContent = PROJECTS.length;
+
+  sparkline($("sp-reports"), 1, false);
+  sparkline($("sp-items"), 3, true);
+  sparkline($("sp-overdue"), 5, true);
+
+  // bars
+  const max = Math.max(...TYPES.map(t => t.items));
+  $("bars").innerHTML = TYPES.map((t, i) => {
+    const val = scaled(t.items);
+    return '<div class="bar" data-tip="' + t.ref + ' - ' + val + ' items">' +
+      '<span class="n">' + t.name + '</span><span class="c">' + val + '</span>' +
+      '<span class="track"><span class="fill' + (i % 3 === 1 ? ' alt' : '') + '" data-w="' +
+      ((val / Math.max(1, scaled(max))) * 100).toFixed(1) + '"></span></span></div>';
+  }).join("");
+  requestAnimationFrame(() => {
+    document.querySelectorAll(".fill").forEach(el => { el.style.width = el.getAttribute("data-w") + "%"; });
+  });
+
+  // projects
+  $("projects").innerHTML = PROJECTS.map((p, i) =>
+    '<button type="button" class="proj" data-i="' + i + '" aria-current="' + (scope === "one" && i === selected) + '">' +
+      '<span class="pn">' + p.name + '</span>' +
+      '<span class="pm"><em>' + p.ref + '</em><span>' + p.reports + ' reports</span>' +
+      '<span>' + p.items + ' items</span>' +
+      (p.overdue ? '<span class="warn">' + p.overdue + ' overdue</span>' : '<span>-</span>') +
+      '</span></button>').join("");
+}
+
+/* ---------- interaction ---------- */
+document.addEventListener("click", (e) => {
+  const proj = e.target.closest(".proj");
+  if (proj){
+    selected = Number(proj.getAttribute("data-i"));
+    scope = "one";
+    setSeg();
+    render();
+  }
+});
+document.addEventListener("mouseover", (e) => {
+  const proj = e.target.closest(".proj");
+  if (proj && scope !== "one"){
+    const i = Number(proj.getAttribute("data-i"));
+    const keep = scope; scope = "one"; selected = i; render(); scope = keep;
+  }
+});
+document.getElementById("projects").addEventListener("mouseleave", () => { if (scope === "all") render(); });
+
+function setSeg(){
+  $("s-all").setAttribute("aria-pressed", String(scope === "all"));
+  $("s-one").setAttribute("aria-pressed", String(scope === "one"));
+}
+$("s-all").addEventListener("click", () => { scope = "all"; setSeg(); render(); });
+$("s-one").addEventListener("click", () => { scope = "one"; setSeg(); render(); });
+
+const wseg = document.createElement("div");
+wseg.className = "seg"; wseg.setAttribute("role", "group"); wseg.setAttribute("aria-label", "Time window");
+wseg.innerHTML = '<button type="button" data-w="all" aria-pressed="true">All time</button>' +
+                 '<button type="button" data-w="month" aria-pressed="false">30 days</button>' +
+                 '<button type="button" data-w="week" aria-pressed="false">7 days</button>';
+document.getElementById("wseg-slot").appendChild(wseg);
+wseg.addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-w]"); if (!b) return;
+  windowKey = b.getAttribute("data-w");
+  wseg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  render();
+});
+
+/* tooltips */
+const tip = $("tip");
+document.addEventListener("mousemove", (e) => {
+  const el = e.target.closest("[data-tip]");
+  if (el){
+    tip.textContent = el.getAttribute("data-tip");
+    tip.classList.add("on");
+    tip.style.left = Math.min(window.innerWidth - 280, e.clientX + 14) + "px";
+    tip.style.top = (e.clientY + 16) + "px";
+  } else tip.classList.remove("on");
+});
+
+/* ticker */
+$("run").innerHTML = OVERDUE.concat(OVERDUE).map(o =>
+  '<span><b>' + o[0] + '</b> ' + o[1] + ' <i>' + o[3] + ' late</i></span>').join("");
+
+/* clock */
+setInterval(() => {
+  $("h-clock").textContent = new Date().toLocaleTimeString("en-GB");
+}, 1000);
+$("h-clock").textContent = new Date().toLocaleTimeString("en-GB");
+
+render();
+</script>
+</body>
+</html>
