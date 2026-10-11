@@ -257,18 +257,23 @@
 function rng(seed){ return function(){ seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }; }
 const rand = rng(20261011);
 
+/* Survey type and reference prefix travel together, and the prefix follows the
+   project. Picking them independently produced nonsense such as a DEMO- reference
+   filed against Riverside Court, which undermines the whole point of shaping the
+   sample from real records. */
 const SURVEYS = [
-  "Property inventory and schedule of condition",
-  "Electrical installation condition",
-  "Fit-out and finishes quality",
-  "Mechanical and HVAC installation",
-  "Damp, mould and water ingress",
-  "Site condition"
+  { name:"Property inventory and schedule of condition", prefix:"DEMO-INV", demo:true },
+  { name:"Electrical installation condition", prefix:"EIC-2026-10", demo:false },
+  { name:"Fit-out and finishes quality", prefix:"DEMO-FQ", demo:true },
+  { name:"Mechanical and HVAC installation", prefix:"DEMO-MS", demo:true },
+  { name:"Damp, mould and water ingress", prefix:"DEMO-DM", demo:true },
+  { name:"Site condition", prefix:"DEMO-SC", demo:true },
+  { name:"Manual photographic report", prefix:"MPR-2026-10", demo:false }
 ];
 const PROJECTS = [
-  { name:"Demonstration property - London", ref:"DEMO-001", items:117 },
-  { name:"Riverside Court - Cat B Fit-Out, Phase 2", ref:"HCE-2417", items:16 },
-  { name:"instructSiteTEST", ref:"Production", items:0 }
+  { name:"Demonstration property - London", ref:"DEMO-001", items:117, demo:true },
+  { name:"Riverside Court - Cat B Fit-Out, Phase 2", ref:"HCE-2417", items:16, demo:false },
+  { name:"instructSiteTEST", ref:"Production", items:0, demo:true }
 ];
 const WEEKS = ["17-23 Aug","24-30 Aug","31 Aug-6 Sep","7-13 Sep","14-20 Sep","21-27 Sep","28 Sep-4 Oct","5-11 Oct"];
 
@@ -283,13 +288,14 @@ const WORDS = [
   "Handrail fixing loose at landing","Roof light seal pinched at corner","Gutter running joint leaking"
 ];
 const TRADES = ["Groundworks","Mechanical","Electrical","Drylining","Roofing","Fire stopping","Unallocated"];
-const REFPREFIX = ["DEMO-INV","DEMO-EL","DEMO-FQ","DEMO-MS","DEMO-DM","DEMO-SC","EIC-2026-10","MPR-2026-10","SNG-2026-10"];
 
 /* Build items with an even spread of states, so the map has real texture. */
 const ITEMS = [];
 let n = 0;
 for (const p of PROJECTS){
   const cap = Math.min(p.items, 60);
+  // Only the surveys that belong to this project's world.
+  const pool = SURVEYS.filter(s => s.demo === p.demo);
   for (let i = 0; i < cap; i++){
     n++;
     const r = rand();
@@ -298,15 +304,15 @@ for (const p of PROJECTS){
     else if (r > 0.62) state = "assigned";
     else if (r > 0.54) state = "closed";
     else if (r > 0.48) state = "none";
-    const survey = SURVEYS[Math.floor(rand() * SURVEYS.length)];
+    const survey = pool[Math.floor(rand() * pool.length)];
     const week = WEEKS[Math.floor(rand() * WEEKS.length)];
     ITEMS.push({
       id: n,
       title: WORDS[Math.floor(rand() * WORDS.length)],
-      ref: REFPREFIX[Math.floor(rand() * REFPREFIX.length)] + "-" + String(100 + Math.floor(rand() * 899)),
+      ref: survey.prefix + "-" + String(100 + Math.floor(rand() * 899)),
       project: p.name,
       projectRef: p.ref,
-      survey: survey,
+      survey: survey.name,
       state: state,
       week: week,
       due: state === "late" ? (2 + Math.floor(rand() * 12)) + " days past" : (5 + Math.floor(rand() * 25)) + " days",
@@ -331,9 +337,9 @@ function groupRows(){
   }
   if (groupBy === "survey"){
     return SURVEYS.map(s => ({
-      key: s, name: s, ref: "",
-      items: ITEMS.filter(i => i.survey === s),
-      total: ITEMS.filter(i => i.survey === s).length
+      key: s.name, name: s.name, ref: "",
+      items: ITEMS.filter(i => i.survey === s.name),
+      total: ITEMS.filter(i => i.survey === s.name).length
     }));
   }
   return WEEKS.slice().reverse().map(w => ({
