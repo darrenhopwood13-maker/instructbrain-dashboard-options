@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Choosing a report template - working screen (design mockup)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2324417B'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%2357FF00'/%3E%3C/svg%3E">
+<style>
+  /* ============================================================
+     CHOOSING A REPORT TEMPLATE
+     Work surface: white ground, navy chrome, one accent. The list is
+     grouped by the job, not by the internal category key, so no heading
+     can appear twice and no heading repeats its own item's name.
+     Three views to compare: the working screen, the new white dropdown,
+     and the list as it renders today.
+     ============================================================ */
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#24417B;
+    --navy-ink:#16233F;
+    --brand:#2E5BC7;
+    --laser:#57FF00;
+    --ink:#2A3345;
+    --muted:#6B7383;
+    --rule:#E4E6EC;
+    --sunken:#F5F6F8;
+    --paper:#FFFFFF;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  body{font-family:var(--sans);color:var(--ink);background:var(--sunken);-webkit-font-smoothing:antialiased;line-height:1.45;min-height:100vh;padding-bottom:40px}
+  .note{background:var(--laser);color:#062100;font:600 12px/1.45 var(--sans);text-align:center;padding:7px 14px}
+  .note b{font-weight:800}
+
+  /* mock-up switch, clearly not part of the product */
+  .rig{background:var(--navy-ink);padding:12px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .rig span{font:700 10px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:#8FA3C8}
+  .rig button{appearance:none;border:1px solid #3A4A6E;background:#1E2B49;color:#C8D4E8;font:600 12px var(--sans);padding:8px 13px;border-radius:4px;cursor:pointer}
+  .rig button[aria-pressed=true]{background:var(--laser);border-color:var(--laser);color:#062100}
+
+  .stage{max-width:540px;margin:18px auto;padding:0 14px}
+  .stage.wide{max-width:1000px}
+  .screen{background:var(--paper);border:1px solid var(--rule);border-radius:14px;overflow:hidden;box-shadow:0 18px 40px rgba(22,35,63,.10)}
+
+  /* app chrome */
+  .chrome{background:var(--navy);color:#fff;display:flex;align-items:center;gap:12px;padding:12px 16px}
+  .chrome .mark{font-weight:800;font-size:16px;letter-spacing:-.02em}
+  .chrome .mark i{font-style:normal;color:var(--laser)}
+  .chrome .back{font:600 12px var(--sans);color:#C8D4E8;border:1px solid #46618F;background:none;border-radius:999px;padding:5px 11px;cursor:pointer}
+  .stepper{display:flex;gap:8px;padding:12px 16px 0;font:600 11px var(--sans);color:var(--muted);flex-wrap:wrap}
+  .stepper b{color:var(--navy)}
+  .step{display:flex;align-items:center;gap:7px}
+  .dot{width:19px;height:19px;border-radius:50%;background:var(--sunken);border:1px solid var(--rule);display:grid;place-items:center;font:700 10px var(--mono);color:var(--muted)}
+  .step.on .dot{background:var(--navy);border-color:var(--navy);color:#fff}
+
+  h1{font-size:24px;line-height:1.2;letter-spacing:-.02em;text-align:center;color:var(--navy);padding:18px 18px 4px}
+  .sub{text-align:center;font-size:14px;color:var(--muted);padding:0 22px 16px}
+
+  .lastused{margin:0 16px 16px;border:1.5px solid var(--navy);border-radius:12px;padding:13px 14px;display:flex;align-items:center;gap:12px;background:#F7F9FF;cursor:pointer;text-align:left;width:calc(100% - 32px)}
+  .lastused .tagline{display:block;font:700 10px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--brand)}
+  .lastused .nm{display:block;font-size:17px;font-weight:700;color:var(--navy);margin-top:2px}
+  .lastused .go{margin-left:auto;font-size:20px;color:var(--navy)}
+
+  .fam{padding:6px 16px 2px}
+  .fam h2{font:700 11px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:14px 2px 8px;border-top:1px solid var(--rule);margin-top:8px}
+  .fam:first-of-type h2{margin-top:0}
+  .row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:14px 14px;margin-bottom:8px;cursor:pointer;font-family:inherit}
+  .row:hover{border-color:#B9C4DA;background:#FCFDFF}
+  .row[aria-pressed=true]{border-color:var(--navy);border-width:1.5px;background:#F7F9FF}
+  .row .txt{display:block;min-width:0}
+  .row .nm{display:block;font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+  .row .why{display:block;font-size:14px;color:var(--muted);margin-top:3px}
+  .row .chev{margin-left:auto;color:#9AA6BC;font-size:20px;flex:0 0 auto}
+  .row[aria-pressed=true] .chev{color:var(--navy)}
+  .tick{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--rule);flex:0 0 auto;display:grid;place-items:center;color:transparent;font-size:12px;font-weight:800}
+  .row[aria-pressed=true] .tick{background:var(--navy);border-color:var(--navy);color:#fff}
+
+  .footbar{position:sticky;bottom:0;background:var(--paper);border-top:1px solid var(--rule);padding:12px 16px;display:flex;gap:12px;align-items:center}
+  .cta{margin-left:auto;background:var(--navy);color:#fff;border:0;border-radius:9px;padding:13px 18px;font:700 15px var(--sans);cursor:pointer}
+  .cta[disabled]{background:#C6CDDB;cursor:not-allowed}
+  .picked{font-size:13px;color:var(--muted)}
+
+  /* the dropdown view */
+  .dwrap{padding:18px 16px 22px}
+  .fieldlbl{font-size:13px;font-weight:600;margin-bottom:6px}
+  .trigger{width:100%;text-align:left;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:13px 14px;font:600 16px var(--sans);color:var(--ink);display:flex;gap:10px;align-items:center}
+  .trigger .v{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .trigger .caret{margin-left:auto;color:#8494AE}
+  .pop{margin-top:10px;background:var(--paper);border:1px solid var(--rule);border-radius:12px;box-shadow:0 20px 44px rgba(22,35,63,.16);overflow:hidden;max-height:520px;overflow-y:auto}
+  .pop .ph{font:700 11px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:12px 14px 6px}
+  .opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;padding:12px 14px;font-family:inherit;cursor:pointer}
+  .opt .txt{display:block;min-width:0}
+  .opt:hover,.opt[aria-selected=true]{background:#F1F5FF}
+  .opt .nm{display:block;font-size:16px;font-weight:600;color:var(--ink)}
+  .opt .why{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+  .opt .tick{margin-left:auto}
+  .opt[aria-selected=true] .tick{background:var(--brand);border-color:var(--brand);color:#fff}
+  .pop .ph + .opt{border-top:1px solid #F2F4F8}
+  .pop .opt + .opt{border-top:1px solid #F2F4F8}
+  .legacy{padding:18px 16px 22px}
+  .legacy .why{font-size:13.5px;color:var(--muted);margin-bottom:12px}
+  .lpop{background:var(--navy-ink);border-radius:12px;overflow:hidden;padding:6px 0}
+  .lpop .lh{font:700 11px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:#8FA3C8;padding:11px 16px 5px}
+  .lpop .li{color:#E7ECF6;font-size:15px;font-weight:600;padding:9px 16px}
+  .lpop .dup{background:rgba(255,77,94,.14);border-left:3px solid #FF4D5E}
+  .lpop .badge{font:700 9px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:#FFB3BB;margin-left:8px}
+  details{margin-top:16px;background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:14px 16px}
+  summary{font-weight:700;cursor:pointer;color:var(--navy)}
+  details p{font-size:14px;color:var(--muted);margin-top:10px}
+  details ul{margin:10px 0 0 18px;font-size:14px;color:var(--muted)}
+  footer{max-width:1000px;margin:22px auto 0;padding:0 16px;font-size:12.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="note"><b>DESIGN MOCKUP - not the product.</b> The 12 report names are the live ones. The one-line purpose under each is <b>proposed copy, written for this mock-up and not yet in the product</b>. Groupings are proposed. Nothing has been built or published to the app.</div>
+
+<div class="rig">
+  <span>View</span>
+  <button type="button" data-view="screen" aria-pressed="true">1. Working screen</button>
+  <button type="button" data-view="dropdown" aria-pressed="false">2. White dropdown</button>
+  <button type="button" data-view="today" aria-pressed="false">3. As it renders today</button>
+</div>
+
+<div class="stage" id="stage"></div>
+
+<footer>
+  Built by Banksy for Dal, 12 Oct 2026. Template names and the group keys come from the live
+  <code>systemDefinitions</code> in the app. The duplicated headings in view 3 are reproduced from the live
+  dropdown as it renders today; the fix in views 1 and 2 is one heading per family.
+</footer>
+
+<script>
+const TEMPLATES = [
+  { id:"snagging", fam:"Snagging & handover", name:"Finding identification & remedial schedule",
+    why:"Every photograph becomes a finding: a trade, a severity and the fix. The one for a snagging list." },
+  { id:"fit_out", fam:"Snagging & handover", name:"Fit-out & finishes quality",
+    why:"Finished work checked against the drawing and the specification, including tolerances." },
+
+  { id:"condition", fam:"Condition & fabric", name:"Schedule of Condition",
+    why:"Condition of each element, room by room, on a four-step grade. Records, does not ask for a fix." },
+  { id:"damp_moisture", fam:"Condition & fabric", name:"Damp, mould & water ingress",
+    why:"Moisture diagnosed as active, historic or widespread, with a meter reading." },
+  { id:"condition_survey", fam:"Condition & fabric", name:"Weatherproofing membrane survey",
+    why:"Roof and membrane condition, with the membrane type and the extent affected." },
+
+  { id:"site_walk", fam:"Site & safety", name:"Site condition",
+    why:"A walk of the site: safety, housekeeping, access and welfare, each with a time to fix." },
+
+  { id:"electrical", fam:"M&E", name:"Electrical installation condition",
+    why:"Defects graded against BS 7671, with the board or circuit for each item." },
+  { id:"mechanical", fam:"M&E", name:"Mechanical & HVAC installation",
+    why:"Plant defects, commissioning risks and efficiency losses, by system." },
+
+  { id:"inventory", fam:"Records & registers", name:"Property inventory",
+    why:"Rooms, contents and condition item by item, with quantities." },
+  { id:"record_photo", fam:"Records & registers", name:"Photo condition record",
+    why:"A dated photographic record. Nothing is graded and nothing is analysed." },
+  { id:"manual", fam:"Records & registers", name:"Manual photographic report",
+    why:"Photographs you label yourself. Issued as a PDF, never a review page." },
+  { id:"certificates", fam:"Records & registers", name:"Statutory certificate register",
+    why:"The register of certificates: what it covers, who issued it, when it runs out." },
+];
+
+/* The live dropdown as it renders today: headings repeat because two pairs of internal
+   category keys print the same label, and three headings echo their own item's words. */
+const TODAY = [
+  ["Quality & handover", ["Finding identification & remedial schedule"]],
+  ["Site & safety", ["Site condition"]],
+  ["Building fabric", ["Schedule of Condition", "Damp, mould & water ingress"]],
+  ["Building fabric", ["Weatherproofing membrane survey"]],
+  ["Property records", ["Property inventory"]],
+  ["Electrical", ["Electrical installation condition"]],
+  ["Mechanical & HVAC", ["Mechanical & HVAC installation"]],
+  ["Quality & handover", ["Fit-out & finishes quality"]],
+  ["Simple records", ["Statutory certificate register", "Manual photographic report", "Photo condition record"]],
+];
+const DUPES = { "Building fabric":2, "Quality & handover":2 };
+
+const families = [];
+for (const t of TEMPLATES) {
+  let f = families.find((x) => x.name === t.fam);
+  if (!f) { f = { name: t.fam, rows: [] }; families.push(f); }
+  f.rows.push(t);
+}
+
+let view = "screen";
+let picked = "snagging";
+const stage = document.getElementById("stage");
+
+function render() {
+  document.querySelectorAll(".rig button").forEach((b) =>
+    b.setAttribute("aria-pressed", String(b.dataset.view === view)));
+  stage.className = view === "screen" ? "stage" : "stage wide";
+  stage.innerHTML = view === "screen" ? screenView() : view === "dropdown" ? dropdownView() : todayView();
+  wire();
+}
+
+function chrome(surface) {
+  return `<div class="chrome"><span class="mark">instruct<i>Brain</i></span>
+    <button class="back" type="button">Back</button></div>
+    <div class="stepper">
+      <div class="step on"><span class="dot">1</span> Photos &amp; findings</div>
+      <div class="step"><span class="dot">2</span> Get PDF</div>
+    </div>`;
+}
+
+function screenView() {
+  const chosen = TEMPLATES.find((t) => t.id === picked);
+  return `<div class="screen">
+    ${chrome()}
+    <h1>Choose a report</h1>
+    <p class="sub">The template sets the instructions the AI works to. You can change it before you photograph anything.</p>
+
+    <button class="lastused" type="button" data-pick="snagging">
+      <span><span class="tagline">Last used</span><span class="nm">${TEMPLATES[0].name}</span></span>
+      <span class="go">&rsaquo;</span>
+    </button>
+
+    ${families.map((f) => `
+      <div class="fam">
+        <h2>${f.name}</h2>
+        ${f.rows.map((r) => `
+          <button class="row" type="button" data-pick="${r.id}" aria-pressed="${picked === r.id}">
+            <span class="tick">&#10003;</span>
+            <span class="txt"><span class="nm">${r.name}</span><span class="why">${r.why}</span></span>
+            <span class="chev">&rsaquo;</span>
+          </button>`).join("")}
+      </div>`).join("")}
+
+    <div class="footbar">
+      <span class="picked">${chosen ? chosen.name : "Nothing chosen yet"}</span>
+      <button class="cta" type="button" ${chosen ? "" : "disabled"}>Use this template</button>
+    </div>
+  </div>`;
+}
+
+function dropdownView() {
+  const chosen = TEMPLATES.find((t) => t.id === picked);
+  return `<div class="screen">
+    ${chrome()}
+    <div class="dwrap">
+      <h1 style="padding:0 0 14px">Report template</h1>
+      <div class="fieldlbl">Report template</div>
+      <button class="trigger" type="button"><span class="v">${chosen.name}</span><span class="caret">&#9662;</span></button>
+      <div class="pop">
+        ${families.map((f) => `
+          <div class="ph">${f.name}</div>
+          ${f.rows.map((r) => `
+            <button class="opt" type="button" data-pick="${r.id}" aria-selected="${picked === r.id}">
+              <span class="txt"><span class="nm">${r.name}</span><span class="why">${r.why}</span></span>
+              <span class="tick">&#10003;</span>
+            </button>`).join("")}`).join("")}
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin-top:12px">White panel, 16px names, one line of purpose each, and every heading appears once. On the navy console screens the same panel follows the surface and stays navy.</p>
+    </div>
+  </div>`;
+}
+
+function todayView() {
+  return `<div class="screen">
+    ${chrome()}
+    <div class="legacy">
+      <h1 style="padding:0 0 8px">As it renders today</h1>
+      <p class="why">Reproduced from the live dropdown. Twelve templates, nine headings, but only seven different
+      words - so <b>Building fabric</b> and <b>Quality &amp; handover</b> each print twice, with other groups in
+      between. Three headings also repeat their own item's name.</p>
+      <div class="lpop">
+        ${TODAY.map(([head, items]) => `
+          <div class="lh ${DUPES[head] ? "dup" : ""}">${head}${DUPES[head] ? `<span class="badge">this heading prints twice</span>` : ""}</div>
+          ${items.map((i) => `<div class="li">${i}</div>`).join("")}`).join("")}
+      </div>
+      <details>
+        <summary>Why it happens, and the two fixes</summary>
+        <p>The picker groups templates by their internal category key, and two pairs of those keys share one
+        display label: <code>condition</code> and <code>condition_survey</code> both print "Building fabric",
+        <code>snagging</code> and <code>fit_out</code> both print "Quality &amp; handover". Groups are built in
+        template order, so the repeated heading is emitted again much further down the list.</p>
+        <ul>
+          <li><b>Immediate fix (either design):</b> one heading per label, and headings styled so they cannot be
+          read as items - uppercase, letter-spaced, muted.</li>
+          <li><b>Proper fix (views 1 and 2):</b> group by the job, so the family names, the headings and the
+          template names are three different things and nothing repeats.</li>
+        </ul>
+      </details>
+    </div>
+  </div>`;
+}
+
+function wire() {
+  stage.querySelectorAll("[data-pick]").forEach((el) =>
+    el.addEventListener("click", () => { picked = el.dataset.pick; render(); }));
+  stage.querySelectorAll(".row,.lastused").forEach((el) => el.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); el.click(); }
+  }));
+}
+
+document.querySelector(".rig").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  view = b.dataset.view;
+  render();
+});
+render();
+</script>
+</body>
+</html>
