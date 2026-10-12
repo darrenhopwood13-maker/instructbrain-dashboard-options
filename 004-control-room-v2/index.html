@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>instructBrain dashboard - Option 1 with the open-items box (design mockup)</title>
+<style>
+  /* ============================================================
+     OPTION 1 - "CONTROL ROOM", with the open-items breakdown box.
+     The dashboard is an INSTRUMENT, not a page: dark ground, hairline
+     rules instead of card boxes, monospaced numerals, one accent used
+     only where the eye must land. No recent-actions feed anywhere.
+     ============================================================ */
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#24417B;
+    --ink:#080E1C;
+    --ink-2:#0D1730;
+    --ink-3:#132043;
+    --laser:#57FF00;
+    --paper:#F7F7F3;
+    --dim:#7C8AA8;
+    --dim-2:#9AA7C0;
+    --rule:rgba(154,167,192,.18);
+    --warn:#FF8A3D;
+    --bad:#FF4D5E;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  body{font-family:var(--sans);background:var(--ink);color:var(--paper);-webkit-font-smoothing:antialiased;line-height:1.4;min-height:100vh;padding:0 0 68px;display:flex;flex-direction:column}
+  .mock-note{background:var(--laser);color:#062100;font:600 12px/1.4 var(--sans);text-align:center;padding:6px 12px}
+  .mock-note b{font-weight:800}
+
+  header{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:14px 22px;border-bottom:1px solid var(--rule);background:var(--ink-2)}
+  .mark{font-size:19px;font-weight:800;letter-spacing:-.02em}
+  .mark i{font-style:normal;color:var(--laser)}
+  .hstrip{margin-left:auto;display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+  .hcell{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim)}
+  .hcell b{display:block;font:600 14px var(--mono);color:var(--paper);letter-spacing:0;text-transform:none;margin-top:2px}
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--laser);display:inline-block;margin-right:7px;animation:pulse 2.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+  @media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+
+  .scope{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 22px;border-bottom:1px solid var(--rule)}
+  .scope .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim)}
+  .seg{display:inline-flex;border:1px solid var(--rule);border-radius:3px;overflow:hidden;flex-wrap:wrap}
+  .seg button{appearance:none;background:none;border:0;color:var(--dim-2);font:600 12px var(--sans);padding:7px 13px;cursor:pointer;border-right:1px solid var(--rule)}
+  .seg button:last-child{border-right:0}
+  .seg button[aria-pressed=true]{background:var(--laser);color:#062100}
+  .seg button:hover:not([aria-pressed=true]){background:var(--ink-3);color:var(--paper)}
+  #scope-name{color:var(--laser);font-weight:700}
+
+  main{display:grid;grid-template-columns:236px minmax(0,1fr) 300px;gap:0;align-items:start;flex:1 0 auto}
+  @media (max-width:1080px){main{grid-template-columns:1fr}}
+  .col{padding:20px 22px;border-right:1px solid var(--rule);min-width:0}
+  .col:last-child{border-right:0}
+  @media (max-width:1080px){.col{border-right:0;border-bottom:1px solid var(--rule)}}
+  .ctitle{font-size:10.5px;text-transform:uppercase;letter-spacing:.16em;color:var(--dim);display:flex;justify-content:space-between;gap:8px;margin-bottom:12px}
+  .ctitle .hint{text-transform:none;letter-spacing:0;color:var(--dim);font-size:11px}
+
+  .read{padding:12px 0;border-bottom:1px solid var(--rule)}
+  .read:first-of-type{padding-top:0}
+  .read .k{font-size:11px;color:var(--dim-2)}
+  .read .v{font:700 40px/1 var(--mono);letter-spacing:-.03em;margin:5px 0 3px}
+  .read .v.hot{color:var(--laser)}
+  .read .v.bad{color:var(--bad)}
+  .read .d{font:500 11px var(--mono);color:var(--dim)}
+  .read .d.up{color:var(--warn)}
+
+  .gauge{display:flex;align-items:center;gap:22px;padding-bottom:16px;border-bottom:1px solid var(--rule)}
+  .gwrap{position:relative;width:152px;height:152px;flex:0 0 auto}
+  .gwrap svg{transform:rotate(-90deg)}
+  .gnum{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .gnum b{font:700 34px/1 var(--mono);letter-spacing:-.03em}
+  .gnum span{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim);margin-top:5px}
+  .glegend{font-size:12px;color:var(--dim-2);display:grid;gap:9px;min-width:0}
+  .glegend div{display:flex;align-items:center;gap:8px}
+  .swatch{width:9px;height:9px;border-radius:2px;flex:0 0 auto}
+  .glegend b{font:600 13px var(--mono);color:var(--paper);margin-left:auto}
+
+  .bars{margin-top:14px;display:grid;gap:10px}
+  .bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;cursor:pointer;background:none;border:0;text-align:left;padding:2px 0;font-family:inherit;color:inherit}
+  .bar .n{font-size:12.5px;color:var(--dim-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar:hover .n{color:var(--paper)}
+  .bar[aria-pressed=true] .n{color:var(--laser)}
+  .bar .c{font:600 12.5px var(--mono);color:var(--paper)}
+  .track{grid-column:1/-1;display:block;height:6px;background:var(--ink-3);border-radius:3px;overflow:hidden}
+  .fill{display:block;height:100%;background:var(--laser);width:0;transition:width .5s cubic-bezier(.16,1,.3,1)}
+  @media (prefers-reduced-motion:reduce){.fill{transition:none}}
+
+  /* the raised-per-day columns */
+  .days{display:flex;align-items:flex-end;gap:10px;height:104px;margin-top:6px}
+  .day{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;cursor:pointer;background:none;border:0;padding:0;color:inherit;font-family:inherit}
+  .day .col2{width:100%;background:linear-gradient(180deg,var(--laser),#2ec400);border-radius:2px 2px 0 0;min-height:2px;transition:height .5s cubic-bezier(.16,1,.3,1)}
+  .day[aria-pressed=true] .col2{background:var(--paper)}
+  .day .dv{font:600 11px var(--mono);color:var(--paper)}
+  .day .dl{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+
+  /* the new box */
+  .box{margin-top:20px;border:1px solid var(--rule);border-radius:6px;background:linear-gradient(180deg,rgba(36,65,123,.20),rgba(8,14,28,0));padding:16px 18px}
+  .box .bhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .box h2{font-size:10.5px;text-transform:uppercase;letter-spacing:.16em;color:var(--paper);font-weight:700}
+  .box .dims{margin-left:auto;display:inline-flex;border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+  .box .dims button{appearance:none;background:none;border:0;border-right:1px solid var(--rule);color:var(--dim-2);font:600 11px var(--sans);letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;cursor:pointer}
+  .box .dims button:last-child{border-right:0}
+  .box .dims button[aria-pressed=true]{background:var(--navy);color:var(--paper)}
+  .box .dims button:hover:not([aria-pressed=true]){background:var(--ink-3);color:var(--paper)}
+  .box .note{font-size:11.5px;color:var(--dim);margin-bottom:12px}
+  .box .note b{color:var(--warn);font-weight:600}
+  .split{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:22px;align-items:start}
+  @media (max-width:820px){.split{grid-template-columns:1fr}}
+  .detail{min-width:0}
+  .detail .dhead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .detail .dhead h3{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim-2);font-weight:600}
+  .detail .clear{margin-left:auto;background:none;border:1px solid var(--rule);color:var(--dim-2);font:600 10.5px var(--sans);letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:3px;cursor:pointer}
+  .detail .clear:hover{border-color:var(--laser);color:var(--paper)}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--rule);font-size:12px;white-space:nowrap}
+  th{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:600;position:sticky;top:0;background:var(--ink)}
+  td.n{font-family:var(--mono);color:var(--paper)}
+  td.m{color:var(--dim-2)}
+  tr.late td.m, td.late{color:var(--bad)}
+  .scroll{max-height:330px;overflow:auto;border-top:1px solid var(--rule)}
+
+  .plist{display:grid;gap:14px}
+  .pcard{border:0;border-bottom:1px solid var(--rule);padding:0 0 12px;background:none;color:inherit;text-align:left;font-family:inherit;cursor:pointer;width:100%}
+  .pcard:hover .pn{color:var(--laser)}
+  .pcard[aria-pressed=true] .pn{color:var(--laser)}
+  .pn{font-size:14px;font-weight:700;letter-spacing:-.01em;transition:color .15s}
+  .pm{font:500 11px var(--mono);color:var(--dim);margin-top:1px}
+  .pover{font:600 11px var(--mono);color:var(--warn);margin-top:3px}
+  .prule{font-size:11.5px;color:var(--dim);margin-top:14px}
+
+  .ticker{position:fixed;left:0;right:0;bottom:0;background:var(--ink-2);border-top:1px solid var(--rule);display:flex;align-items:center;gap:14px;padding:9px 16px;overflow:hidden}
+  .ticker .tag{flex:0 0 auto;background:var(--bad);color:#1a0006;font:800 10px var(--sans);letter-spacing:.14em;text-transform:uppercase;padding:3px 7px;border-radius:2px;z-index:1}
+  .ticker .clip{flex:1 1 auto;overflow:hidden;min-width:0}
+  .ticker .run{display:flex;gap:34px;white-space:nowrap;animation:slide 46s linear infinite;font:500 12px var(--mono);color:var(--dim-2);width:max-content}
+  .ticker .run b{color:var(--paper);font-weight:600}
+  .ticker .run i{font-style:normal;color:var(--bad)}
+  @keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @media (prefers-reduced-motion:reduce){.ticker .run{animation:none}}
+  .foot{padding:16px 22px 4px;font-size:11.5px;color:var(--dim);max-width:1000px}
+</style>
+</head>
+<body>
+<div class="mock-note"><b>DESIGN MOCKUP - not the live product.</b> Every figure below is read from the live instructBrain account on 12 Oct 2026. Project names are withheld, so projects read as "Project A/B/C/D". No recent-actions list on this design.</div>
+
+<header>
+  <div class="mark">instruct<i>Brain</i></div>
+  <div class="hstrip">
+    <div class="hcell">Organisation<b id="org-name">instructSite</b></div>
+    <div class="hcell">Window<b id="window-name">All time</b></div>
+    <div class="hcell">Data<b><span class="pulse"></span><span id="clock">--:--:--</span></b></div>
+  </div>
+</header>
+
+<div class="scope">
+  <span class="lbl">Scope</span>
+  <div class="seg" id="proj-seg"></div>
+  <span class="lbl" style="margin-left:8px">Window</span>
+  <div class="seg" id="win-seg"></div>
+  <span class="lbl" style="margin-left:8px">Showing</span>
+  <span id="scope-name">everything</span>
+</div>
+
+<main>
+  <section class="col" id="rail"></section>
+
+  <section class="col">
+    <div class="ctitle">Close-out<span class="hint">every item raised, by lifecycle</span></div>
+    <div id="closeout"></div>
+
+    <div class="ctitle" style="margin-top:20px">Items raised<span class="hint" id="days-hint">click a day to filter the box</span></div>
+    <div id="days"></div>
+
+    <div class="box" id="box">
+      <div class="bhead">
+        <h2>Open items - breakdown</h2>
+        <div class="dims" id="dims"></div>
+      </div>
+      <p class="note" id="boxnote"></p>
+      <div class="split">
+        <div class="bars" id="breakbars"></div>
+        <div class="detail">
+          <div class="dhead">
+            <h3 id="detail-title">All open items</h3>
+            <button class="clear" id="clear" type="button">Clear filter</button>
+          </div>
+          <div class="scroll"><table>
+            <thead><tr><th>Ref</th><th>Project</th><th id="th-dim">Trade</th><th>Status</th><th>Due</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="col">
+    <div class="ctitle">Projects<span class="hint" id="proj-count"></span></div>
+    <div class="plist" id="plist"></div>
+    <p class="prule">Click a project to scope the whole instrument to it. A project with no reports yet is kept on purpose: the empty one answers "which job have we not surveyed?"</p>
+  </section>
+</main>
+
+<p class="foot" id="foot"></p>
+
+<div class="ticker"><span class="tag">Overdue</span><div class="clip"><div class="run" id="ticker"></div></div></div>
+
+<script>
+const DATA = {"fetched_at_utc":"2026-10-12 14:19Z","items":[{"pj":"Project A","rf":"F-001","at":"","st_trade":"","sv":"high","st":"damaged","lc":"open","du":"2026-10-15","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-002","at":"","st_trade":"","sv":"medium","st":"damaged","lc":"open","du":"2026-10-15","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-003","at":"","st_trade":"","sv":"low","st":"monitor","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-004","at":"","st_trade":"","sv":"medium","st":"damaged","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-005","at":"","st_trade":"","sv":"low","st":"monitor","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-006","at":"","st_trade":"","sv":"medium","st":"damaged","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-007","at":"","st_trade":"","sv":"medium","st":"damaged","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-008","at":"","st_trade":"","sv":"low","st":"intact","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-001","at":"","st_trade":"","sv":"","st":"condition_good","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-002","at":"","st_trade":"","sv":"","st":"condition_worn","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-003","at":"","st_trade":"","sv":"","st":"condition_worn","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-004","at":"","st_trade":"","sv":"","st":"condition_good","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-005","at":"","st_trade":"","sv":"","st":"condition_worn","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-006","at":"","st_trade":"","sv":"","st":"condition_used","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-007","at":"","st_trade":"","sv":"","st":"condition_used","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-008","at":"","st_trade":"","sv":"","st":"condition_worn","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-009","at":"","st_trade":"","sv":"","st":"condition_good","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-010","at":"","st_trade":"","sv":"","st":"condition_worn","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-011","at":"","st_trade":"","sv":"","st":"condition_used","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-012","at":"","st_trade":"","sv":"","st":"condition_worn","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-001","at":"Principal contractor","st_trade":"Principal contractor","sv":"housekeeping","st":"observation","lc":"open","du":"2026-10-03","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-002","at":"","st_trade":"","sv":"","st":"satisfactory","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-003","at":"","st_trade":"","sv":"","st":"satisfactory","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-004","at":"Principal contractor","st_trade":"Principal contractor","sv":"this_week","st":"observation","lc":"open","du":"2026-10-08","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-005","at":"Principal contractor","st_trade":"Principal contractor","sv":"this_week","st":"observation","lc":"assigned","du":"2026-10-08","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-006","at":"Principal contractor","st_trade":"Principal contractor","sv":"this_week","st":"observation","lc":"open","du":"2026-10-08","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-007","at":"M&E","st_trade":"M&E","sv":"same_day","st":"observation","lc":"assigned","du":"2026-10-01","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-008","at":"Principal contractor","st_trade":"Principal contractor","sv":"same_day","st":"observation","lc":"assigned","du":"2026-10-01","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-009","at":"Principal contractor","st_trade":"Principal contractor","sv":"this_week","st":"observation","lc":"open","du":"2026-10-08","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-010","at":"Principal contractor","st_trade":"Principal contractor","sv":"housekeeping","st":"observation","lc":"open","du":"2026-10-08","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-001","at":"","st_trade":"","sv":"","st":"condition_used","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-002","at":"","st_trade":"","sv":"","st":"condition_used","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-003","at":"","st_trade":"","sv":"","st":"condition_good","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-004","at":"","st_trade":"","sv":"","st":"condition_used","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-005","at":"","st_trade":"","sv":"","st":"condition_good","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-006","at":"","st_trade":"","sv":"","st":"condition_good","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-001","at":"","st_trade":"","sv":"","st":"condition_good","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-002","at":"","st_trade":"","sv":"","st":"condition_good","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-003","at":"","st_trade":"","sv":"","st":"condition_good","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-004","at":"","st_trade":"","sv":"","st":"condition_as_new","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-005","at":"","st_trade":"","sv":"","st":"condition_good","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-006","at":"","st_trade":"","sv":"","st":"condition_good","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-007","at":"","st_trade":"","sv":"","st":"condition_as_new","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-008","at":"","st_trade":"","sv":"","st":"condition_as_new","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-009","at":"","st_trade":"","sv":"","st":"condition_as_new","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-010","at":"","st_trade":"","sv":"","st":"condition_as_new","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-011","at":"","st_trade":"","sv":"","st":"condition_as_new","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-001","at":"","st_trade":"","sv":"","st":"compliant","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-002","at":"","st_trade":"","sv":"","st":"compliant","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-003","at":"","st_trade":"fire-safety","sv":"","st":"compliant","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-004","at":"","st_trade":"","sv":"","st":"compliant","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-005","at":"","st_trade":"","sv":"","st":"compliant","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-006","at":"","st_trade":"","sv":"","st":"compliant","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-007","at":"","st_trade":"fire protection specialist","sv":"","st":"non_compliant","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-008","at":"","st_trade":"site management","sv":"","st":"non_compliant","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-001","at":"Plasterer","st_trade":"Plasterer","sv":"workmanship","st":"snag","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-002","at":"Decorator","st_trade":"Decorator","sv":"cosmetic","st":"snag","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-003","at":"Tiler","st_trade":"Tiler","sv":"workmanship","st":"snag","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-004","at":"Carpenter / joiner","st_trade":"Carpenter / joiner","sv":"workmanship","st":"snag","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-005","at":"Tiler","st_trade":"Tiler","sv":"cosmetic","st":"snag","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-006","at":"Decorator","st_trade":"Decorator","sv":"cosmetic","st":"snag","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-007","at":"Principal contractor","st_trade":"Principal contractor","sv":"compliance","st":"snag","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-008","at":"Principal contractor","st_trade":"Principal contractor","sv":"performance","st":"snag","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-009","at":"Principal contractor","st_trade":"Principal contractor","sv":"cosmetic","st":"snag","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-010","at":"Principal contractor","st_trade":"Principal contractor","sv":"performance","st":"snag","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-001","at":"Carpenter / joiner","st_trade":"Carpenter / joiner","sv":"visual_minor","st":"design_deviation","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-002","at":"Carpenter / joiner","st_trade":"Carpenter / joiner","sv":"interface_unresolved","st":"design_deviation","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-003","at":"Principal contractor","st_trade":"Principal contractor","sv":"prominent_area","st":"design_deviation","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-004","at":"Tiler","st_trade":"Tiler","sv":"prominent_area","st":"design_deviation","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-005","at":"Decorator","st_trade":"Decorator","sv":"visual_minor","st":"tolerance_query","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-006","at":"Principal contractor","st_trade":"Principal contractor","sv":"prominent_area","st":"design_deviation","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-007","at":"Principal contractor","st_trade":"Principal contractor","sv":"","st":"as_designed","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-008","at":"Principal contractor","st_trade":"Principal contractor","sv":"","st":"as_designed","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-009","at":"Carpenter / joiner","st_trade":"Carpenter / joiner","sv":"","st":"as_designed","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-001","at":"","st_trade":"","sv":"widespread_moisture","st":"active_moisture","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-002","at":"","st_trade":"","sv":"occupancy_risk","st":"active_moisture","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-003","at":"","st_trade":"","sv":"localised_ingress","st":"active_moisture","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-004","at":"","st_trade":"","sv":"widespread_moisture","st":"active_moisture","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-005","at":"","st_trade":"","sv":"localised_ingress","st":"active_moisture","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-006","at":"","st_trade":"","sv":"localised_ingress","st":"active_moisture","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-007","at":"","st_trade":"","sv":"widespread_moisture","st":"active_moisture","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-001","at":"M&E","st_trade":"M&E","sv":"improvement_item","st":"defective_install","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-002","at":"M&E","st_trade":"M&E","sv":"improvement_item","st":"defective_install","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-003","at":"M&E","st_trade":"M&E","sv":"improvement_item","st":"defective_install","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-004","at":"M&E","st_trade":"M&E","sv":"","st":"compliant_install","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-005","at":"M&E","st_trade":"M&E","sv":"improvement_item","st":"defective_install","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-006","at":"M&E","st_trade":"M&E","sv":"improvement_item","st":"improvement_recommended","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-007","at":"M&E","st_trade":"M&E","sv":"potentially_dangerous","st":"defective_install","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-008","at":"M&E","st_trade":"M&E","sv":"potentially_dangerous","st":"defective_install","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-001","at":"M&E","st_trade":"M&E","sv":"","st":"installed_to_standard","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-002","at":"M&E","st_trade":"M&E","sv":"commissioning_risk","st":"installation_defect","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-003","at":"M&E","st_trade":"M&E","sv":"efficiency_loss","st":"installation_defect","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-004","at":"M&E","st_trade":"M&E","sv":"commissioning_risk","st":"incomplete_install","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-005","at":"M&E","st_trade":"M&E","sv":"efficiency_loss","st":"installation_defect","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-006","at":"M&E","st_trade":"M&E","sv":"","st":"installed_to_standard","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-007","at":"M&E","st_trade":"M&E","sv":"efficiency_loss","st":"installation_defect","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-008","at":"M&E","st_trade":"M&E","sv":"efficiency_loss","st":"installation_defect","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-001","at":"","st_trade":"","sv":"","st":"recorded","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-002","at":"","st_trade":"","sv":"","st":"recorded","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-003","at":"","st_trade":"","sv":"","st":"recorded","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-004","at":"","st_trade":"","sv":"","st":"recorded","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-005","at":"","st_trade":"","sv":"","st":"recorded","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-006","at":"","st_trade":"","sv":"","st":"recorded","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-001","at":"","st_trade":"","sv":"","st":"issue_identified","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-002","at":"","st_trade":"","sv":"","st":"issue_identified","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-003","at":"","st_trade":"","sv":"","st":"sound","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-004","at":"","st_trade":"","sv":"","st":"sound","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-005","at":"","st_trade":"","sv":"","st":"sound","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-006","at":"","st_trade":"","sv":"","st":"sound","lc":"open","du":"","rd":"2026-10-02","gr":"","ag":""},{"pj":"Project A","rf":"F-001","at":"","st_trade":"Welfare unit hire / site accommodation supplier","sv":"","st":"compliant","lc":"open","du":"","rd":"2026-10-05","gr":"A","ag":"A"},{"pj":"Project A","rf":"F-002","at":"","st_trade":"","sv":"","st":"compliant","lc":"open","du":"","rd":"2026-10-05","gr":"A","ag":"A"},{"pj":"Project A","rf":"F-003","at":"","st_trade":"Plumber","sv":"","st":"non_compliant","lc":"open","du":"","rd":"2026-10-05","gr":"C","ag":"C"},{"pj":"Project A","rf":"F-004","at":"","st_trade":"Site manager or appointed first aider (welfare provision)","sv":"","st":"compliant","lc":"open","du":"","rd":"2026-10-05","gr":"A","ag":"A"},{"pj":"Project A","rf":"F-005","at":"","st_trade":"General building / welfare unit fit-out contractor","sv":"","st":"non_compliant","lc":"open","du":"","rd":"2026-10-05","gr":"C","ag":"C"},{"pj":"Project B","rf":"F-001","at":"Principal contractor","st_trade":"Principal contractor","sv":"further_investigation","st":"defective_install","lc":"assigned","du":"","rd":"2026-10-08","gr":"C","ag":"C"},{"pj":"Project B","rf":"F-002","at":"Principal contractor","st_trade":"Principal contractor","sv":"improvement_item","st":"improvement_recommended","lc":"assigned","du":"2026-10-22","rd":"2026-10-08","gr":"B","ag":"B"},{"pj":"Project B","rf":"F-003","at":"Principal contractor","st_trade":"Principal contractor","sv":"improvement_item","st":"improvement_recommended","lc":"assigned","du":"2026-10-22","rd":"2026-10-08","gr":"B","ag":"B"},{"pj":"Project B","rf":"F-005","at":"Principal contractor","st_trade":"Principal contractor","sv":"further_investigation","st":"improvement_recommended","lc":"assigned","du":"","rd":"2026-10-08","gr":"B","ag":"B"},{"pj":"Project B","rf":"F-006","at":"Principal contractor","st_trade":"Principal contractor","sv":"further_investigation","st":"improvement_recommended","lc":"assigned","du":"","rd":"2026-10-08","gr":"B","ag":"B"},{"pj":"Project B","rf":"F-007","at":"Principal contractor","st_trade":"Principal contractor","sv":"improvement_item","st":"improvement_recommended","lc":"assigned","du":"2026-10-22","rd":"2026-10-08","gr":"B","ag":"B"},{"pj":"Project B","rf":"F-008","at":"Principal contractor","st_trade":"Principal contractor","sv":"improvement_item","st":"defective_install","lc":"assigned","du":"2026-10-22","rd":"2026-10-08","gr":"C","ag":"C"},{"pj":"Project B","rf":"F-009","at":"Principal contractor","st_trade":"Principal contractor","sv":"improvement_item","st":"improvement_recommended","lc":"assigned","du":"2026-10-22","rd":"2026-10-08","gr":"B","ag":"B"},{"pj":"Project B","rf":"F-010","at":"Principal contractor","st_trade":"Principal contractor","sv":"potentially_dangerous","st":"defective_install","lc":"assigned","du":"2026-10-09","rd":"2026-10-08","gr":"D","ag":"D"},{"pj":"Project B","rf":"F-012","at":"Principal contractor","st_trade":"Principal contractor","sv":"","st":"compliant_install","lc":"assigned","du":"","rd":"2026-10-08","gr":"B","ag":"B"},{"pj":"Project B","rf":"F-001","at":"","st_trade":"","sv":"","st":"recorded","lc":"open","du":"","rd":"2026-10-08","gr":"","ag":""},{"pj":"Project B","rf":"F-002","at":"","st_trade":"","sv":"","st":"recorded","lc":"open","du":"","rd":"2026-10-08","gr":"","ag":""},{"pj":"Project B","rf":"F-003","at":"","st_trade":"","sv":"","st":"recorded","lc":"open","du":"","rd":"2026-10-08","gr":"","ag":""},{"pj":"Project B","rf":"F-004","at":"","st_trade":"","sv":"","st":"recorded","lc":"open","du":"","rd":"2026-10-08","gr":"","ag":""},{"pj":"Project B","rf":"F-005","at":"","st_trade":"","sv":"","st":"recorded","lc":"open","du":"","rd":"2026-10-08","gr":"","ag":""},{"pj":"Project B","rf":"F-006","at":"","st_trade":"","sv":"","st":"recorded","lc":"open","du":"","rd":"2026-10-08","gr":"","ag":""},{"pj":"Project A","rf":"F-001","at":"","st_trade":"Plant fitter / mechanical engineer","sv":"","st":"non_compliant","lc":"open","du":"","rd":"2026-10-09","gr":"C","ag":"C"},{"pj":"Project A","rf":"F-002","at":"","st_trade":"Lifting equipment hire / mechanical handling engineer","sv":"","st":"not_assessed","lc":"open","du":"","rd":"2026-10-09","gr":"B","ag":"B"},{"pj":"Project A","rf":"F-003","at":"","st_trade":"Lifting equipment inspection body (LOLER competent person) with the plant hirer for the MEWP","sv":"","st":"not_assessed","lc":"open","du":"","rd":"2026-10-09","gr":"B","ag":"B"},{"pj":"No project","rf":"F-001","at":"","st_trade":"","sv":"","st":"not_assessed","lc":"open","du":"","rd":"2026-10-11","gr":"","ag":""},{"pj":"No project","rf":"F-002","at":"","st_trade":"","sv":"","st":"not_assessed","lc":"open","du":"","rd":"2026-10-11","gr":"","ag":""},{"pj":"No project","rf":"F-003","at":"","st_trade":"Electrician","sv":"workmanship","st":"snag","lc":"open","du":"","rd":"2026-10-11","gr":"D","ag":"D"},{"pj":"No project","rf":"F-004","at":"","st_trade":"","sv":"","st":"not_assessed","lc":"open","du":"","rd":"2026-10-11","gr":"B","ag":"B"},{"pj":"No project","rf":"F-005","at":"","st_trade":"Decorator","sv":"","st":"not_assessed","lc":"open","du":"","rd":"2026-10-11","gr":"B","ag":"B"},{"pj":"No project","rf":"F-006","at":"","st_trade":"Plasterer","sv":"workmanship","st":"snag","lc":"open","du":"","rd":"2026-10-11","gr":"B","ag":"B"},{"pj":"No project","rf":"F-007","at":"","st_trade":"","sv":"","st":"not_assessed","lc":"open","du":"","rd":"2026-10-11","gr":"B","ag":"B"},{"pj":"No project","rf":"F-008","at":"","st_trade":"","sv":"","st":"not_assessed","lc":"open","du":"","rd":"2026-10-11","gr":"A","ag":"A"},{"pj":"No project","rf":"F-009","at":"","st_trade":"Electrician","sv":"workmanship","st":"snag","lc":"open","du":"","rd":"2026-10-11","gr":"C","ag":"C"}],"projects":[{"pj":"Project A","reports":18,"items":117},{"pj":"Project B","reports":3,"items":16},{"pj":"No project","reports":2,"items":9},{"pj":"Project C","reports":0,"items":0},{"pj":"Project D","reports":0,"items":0}],"totals":{"findings":142}};
+
+const ITEMS = DATA.items;
+const TODAY = new Date("2026-10-12T00:00:00Z");
+const DAY = 86400000;
+
+const state = { project: "all", window: "all", dim: "trade", group: null };
+
+/* ---------- shaping ---------- */
+const tradeOf = (it) => it.at ? it.at : (it.st_trade ? "AI suggests: " + it.st_trade : "Not allocated");
+const sevOf = (it) => it.sv ? it.sv.replace(/_/g, " ") : "No severity recorded";
+const sevRaw = (it) => it.sv;
+const raised = (it) => new Date(it.rd + "T00:00:00Z");
+const daysLate = (it) => it.du ? Math.floor((TODAY - new Date(it.du + "T00:00:00Z")) / DAY) : null;
+const isLate = (it) => { const d = daysLate(it); return d !== null && d > 0; };
+
+function inScope() {
+  let list = ITEMS.filter((it) => state.project === "all" || it.pj === state.project);
+  if (state.window !== "all") {
+    const days = state.window === "7d" ? 7 : 30;
+    const from = new Date(TODAY - (days - 1) * DAY);
+    const newest = list.reduce((acc, it) => Math.max(acc, raised(it)), 0);
+    const edge = Math.max(from, 0);
+    list = list.filter((it) => raised(it) >= edge);
+    void newest;
+  }
+  return list;
+}
+const count = (list, key) => list.reduce((acc, it) => { const k = key(it); acc[k] = (acc[k] || 0) + 1; return acc; }, {});
+const sorted = (obj) => Object.entries(obj).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const shortDate = (iso) => iso ? new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "2-digit", month: "short" }) : "-";
+
+/* ---------- readings rail ---------- */
+function renderRail(list) {
+  const projects = state.project === "all"
+    ? DATA.projects
+    : DATA.projects.filter((p) => p.pj === state.project);
+  const allocated = list.filter((it) => it.at).length;
+  const late = list.filter(isLate).length;
+  const oldest = list.map(daysLate).filter((d) => d !== null && d > 0);
+  const reports = projects.reduce((a, p) => a + p.reports, 0);
+  const emptyProjects = projects.filter((p) => p.reports === 0).length;
+  document.getElementById("rail").innerHTML = `
+    <div class="ctitle">Readings<span class="hint">${state.project === "all" ? "all projects" : state.project}</span></div>
+    <div class="read"><div class="k">Reports</div><div class="v">${reports}</div><div class="d">${projects.length} project${projects.length === 1 ? "" : "s"}</div></div>
+    <div class="read"><div class="k">Open items</div><div class="v hot">${list.length}</div><div class="d">${allocated} allocated to a trade</div></div>
+    <div class="read"><div class="k">Overdue</div><div class="v ${late ? "bad" : ""}">${late}</div><div class="d ${late ? "up" : ""}">${oldest.length ? "oldest " + Math.max(...oldest) + " days late" : "nothing past its date"}</div></div>
+    <div class="read"><div class="k">Projects</div><div class="v">${projects.length}</div><div class="d">${emptyProjects} with no reports yet</div></div>
+    <div class="read"><div class="k">Due dates set</div><div class="v">${list.filter((it) => it.du).length}</div><div class="d">of ${list.length} open items</div></div>`;
+}
+
+/* ---------- close-out gauge ---------- */
+function renderCloseout(list) {
+  const closed = list.filter((it) => it.lc === "closed").length;
+  const assigned = list.filter((it) => it.lc === "assigned").length;
+  const open = list.length - closed - assigned;
+  const pct = list.length ? Math.round((closed / list.length) * 100) : 0;
+  const R = 66, C = 2 * Math.PI * R;
+  document.getElementById("closeout").innerHTML = `
+    <div class="gauge">
+      <div class="gwrap">
+        <svg width="152" height="152" viewBox="0 0 152 152" aria-hidden="true">
+          <circle cx="76" cy="76" r="${R}" fill="none" stroke="#132043" stroke-width="13"></circle>
+          <circle cx="76" cy="76" r="${R}" fill="none" stroke="#57FF00" stroke-width="13"
+                  stroke-dasharray="${C}" stroke-dashoffset="${C - (C * pct) / 100}" stroke-linecap="round"></circle>
+        </svg>
+        <div class="gnum"><b>${pct}%</b><span>closed out</span></div>
+      </div>
+      <div class="glegend">
+        <div><span class="swatch" style="background:#57FF00"></span>Closed out<b>${closed}</b></div>
+        <div><span class="swatch" style="background:#3D6BE0"></span>Open - assigned<b>${assigned}</b></div>
+        <div><span class="swatch" style="background:#FF8A3D"></span>Open - not assigned<b>${open}</b></div>
+        <div><span class="swatch" style="background:#FF4D5E"></span>Of those, overdue<b>${list.filter(isLate).length}</b></div>
+      </div>
+    </div>`;
+}
+
+/* ---------- raised per day ---------- */
+function renderDays(list) {
+  const byDay = count(list, (it) => it.rd);
+  const days = Object.keys(byDay).sort();
+  const max = Math.max(1, ...Object.values(byDay));
+  document.getElementById("days").innerHTML = days.length
+    ? `<div class="days">${days.map((d) => `
+        <button class="day" type="button" data-d="${d}" aria-pressed="false" title="${byDay[d]} items raised on ${shortDate(d)}">
+          <span class="dv">${byDay[d]}</span>
+          <span class="col2" style="height:${Math.round((byDay[d] / max) * 72)}px"></span>
+          <span class="dl">${shortDate(d)}</span>
+        </button>`).join("")}</div>`
+    : `<p class="prule">No items in this window.</p>`;
+}
+
+/* ---------- trade bars (the box's own list) ---------- */
+const TOP_GROUPS = 12;
+function tradeBarsHtml(list) { return ""; }
+function topGroupsHtml(list) { return ""; }
+
+/* ---------- the breakdown box ---------- */
+const DIMS = [["trade", "Trade"], ["severity", "Severity"], ["date", "Date raised"], ["project", "Project"]];
+const keyFor = (dim) => ({ trade: tradeOf, severity: sevOf, date: (it) => it.rd, project: (it) => it.pj }[dim]);
+
+function renderDims() {
+  document.getElementById("dims").innerHTML = DIMS.map(([id, label]) =>
+    `<button type="button" data-dim="${id}" aria-pressed="${state.dim === id}">${label}</button>`).join("");
+}
+
+function renderBox(list) {
+  const key = keyFor(state.dim);
+  const by = sorted(count(list, key));
+  const head = by.slice(0, TOP_GROUPS);
+  const tail = by.slice(TOP_GROUPS);
+  const max = Math.max(1, ...head.map(([, n]) => n));
+  const other = tail.reduce((a, [, n]) => a + n, 0);
+
+  // The severity axis reports its own data quality, because free text does not group.
+  const noSev = list.filter((it) => !sevRaw(it)).length;
+  const words = new Set(list.map(sevRaw).filter(Boolean)).size;
+  document.getElementById("boxnote").innerHTML = state.dim === "severity"
+    ? `Severity is free text today: <b>${noSev} of ${list.length}</b> items carry none, and the rest use <b>${words} different words</b>. This axis groups them as recorded - it is why a fixed ladder is the next change.`
+    : state.dim === "date"
+      ? "Grouped by the day each item was raised. Click a column in Items raised, or a day here."
+      : state.dim === "project"
+        ? "Grouped by project. Projects with no items do not appear."
+        : "Grouped by who the item was allocated to. 'AI suggests' means nothing has been allocated yet.";
+
+  document.getElementById("breakbars").innerHTML =
+    head.map(([k, n]) => `
+      <button class="bar" type="button" data-group="${esc(k)}" aria-pressed="${state.group === k}" title="${n} items">
+        <span class="n">${esc(state.dim === "date" ? shortDate(k) : k)}</span><span class="c">${n}</span>
+        <span class="track"><span class="fill" style="width:${(n / max) * 100}%"></span></span>
+      </button>`).join("") +
+    (tail.length ? `
+      <div class="bar" style="cursor:default" title="${tail.map(([k, n]) => (state.dim === "date" ? shortDate(k) : k) + " (" + n + ")").join(", ")}">
+        <span class="n">Other (${tail.length} group${tail.length === 1 ? "" : "s"})</span><span class="c">${other}</span>
+        <span class="track"><span class="fill" style="width:${(other / max) * 100}%;opacity:.5"></span></span>
+      </div>` : "");
+
+  const rows = state.group === null ? list : list.filter((it) => key(it) === state.group);
+  document.getElementById("detail-title").textContent = state.group === null
+    ? `All ${list.length} open items`
+    : `${rows.length} of ${list.length} - ${state.dim === "date" ? shortDate(state.group) : state.group}`;
+  document.getElementById("th-dim").textContent = DIMS.find(([id]) => id === state.dim)[1];
+  document.getElementById("rows").innerHTML = rows.slice(0, 400).map((it) => {
+    const d = state.dim === "trade" ? tradeOf(it) : state.dim === "severity" ? sevOf(it) : state.dim === "date" ? shortDate(it.rd) : it.pj;
+    const late = isLate(it);
+    return `<tr>
+      <td class="n">${esc(it.rf)}</td>
+      <td class="m">${esc(it.pj)}</td>
+      <td class="m">${esc(d)}</td>
+      <td class="m">${esc(it.st.replace(/_/g, " "))}</td>
+      <td class="${late ? "late" : "m"}">${it.du ? shortDate(it.du) + (late ? " (" + daysLate(it) + "d)" : "") : "-"}</td>
+    </tr>`;
+  }).join("");
+}
+
+/* ---------- projects rail ---------- */
+function renderProjects() {
+  const inWindow = (p) => p;
+  document.getElementById("proj-count").textContent = DATA.projects.length + " in the account";
+  document.getElementById("plist").innerHTML = DATA.projects.map((p) => {
+    const late = ITEMS.filter((it) => it.pj === p.pj).filter(isLate).length;
+    return `<button class="pcard" type="button" data-project="${esc(p.pj)}" aria-pressed="${state.project === p.pj}">
+      <span class="pn">${esc(p.pj)}</span>
+      <span class="pm">${p.reports} report${p.reports === 1 ? "" : "s"} · ${p.items} item${p.items === 1 ? "" : "s"}</span>
+      ${late ? `<span class="pover">${late} overdue</span>` : `<span class="pm">${p.reports ? "nothing overdue" : "no reports yet"}</span>`}
+    </button>`;
+  }).join("");
+  void inWindow;
+}
+
+/* ---------- overdue ticker ---------- */
+function renderTicker(list) {
+  const late = list.filter(isLate).sort((a, b) => daysLate(b) - daysLate(a));
+  const cell = (it) => `<span><b>${esc(it.pj)} · ${esc(it.rf)}</b> ${esc(tradeOf(it))} <i>${daysLate(it)} days late</i></span>`;
+  const line = late.map(cell).join("");
+  document.getElementById("ticker").innerHTML = late.length
+    ? `<div style="display:flex;gap:34px">${line}</div><div style="display:flex;gap:34px">${line}</div>`
+    : `<span>Nothing is past its due date.</span>`;
+}
+
+/* ---------- footer ---------- */
+function renderFoot() {
+  const allocated = ITEMS.filter((it) => it.at).length;
+  document.getElementById("foot").innerHTML =
+    `Figures read from the live instructBrain account at ${DATA.fetched_at_utc}: ${ITEMS.length} items across ${DATA.projects.length} projects, ${ITEMS.filter((it) => it.du).length} of them carrying a due date. ` +
+    `${allocated} of ${ITEMS.length} items are allocated to a trade. Nothing on this account has been closed out yet, which is why the gauge reads 0%. These are mock data shown onto a design, not the live product.`;
+}
+
+/* ---------- wiring ---------- */
+function seg(el, options, current, onPick) {
+  document.getElementById(el).innerHTML = options.map(([id, label]) =>
+    `<button type="button" data-id="${id}" aria-pressed="${current === id}">${label}</button>`).join("");
+  document.getElementById(el).onclick = (e) => {
+    const b = e.target.closest("button");
+    if (b) onPick(b.dataset.id);
+  };
+}
+
+function renderAll() {
+  const list = inScope();
+  renderRail(list);
+  renderCloseout(list);
+  renderDays(list);
+  renderDims();
+  renderBox(list);
+  renderProjects();
+  renderTicker(list);
+  renderFoot();
+  document.getElementById("days-hint").textContent = list.length
+    ? `click a day to filter the box`
+    : "nothing raised in this window";
+  document.getElementById("window-name").textContent =
+    state.window === "all" ? "All time" : state.window === "30d" ? "Last 30 days" : "Last 7 days";
+  document.getElementById("scope-name").textContent =
+    state.project === "all" ? "everything" : state.project;
+}
+
+seg("proj-seg", [["all", "All projects"], ["selected", "Selected project"]].filter(([id]) => id === "all" || state.project !== "all"),
+  state.project === "all" ? "all" : "selected", (id) => {
+    state.project = id === "all" ? "all" : (state.project === "all" ? DATA.projects[0].pj : state.project);
+    renderAll();
+  });
+seg("win-seg", [["all", "All time"], ["30d", "30 days"], ["7d", "7 days"]], state.window, (id) => { state.window = id; renderAll(); });
+
+document.addEventListener("click", (e) => {
+  const dim = e.target.closest("[data-dim]");
+  if (dim) { state.dim = dim.dataset.dim; state.group = null; renderAll(); return; }
+  const grp = e.target.closest("[data-group]");
+  if (grp) { const g = grp.dataset.group; state.group = state.group === g ? null : g; renderAll(); return; }
+  const tr = e.target.closest("[data-trade]");
+  if (tr) {
+    const t = tr.dataset.trade;
+    state.dim = "trade"; state.group = state.group === t ? null : t; renderAll();
+    document.getElementById("box").scrollIntoView({ behavior: "smooth", block: "nearest" }); return;
+  }
+  const day = e.target.closest("[data-d]");
+  if (day) {
+    const d = day.dataset.d;
+    state.dim = "date";
+    state.group = state.group === d ? null : d;
+    renderAll();
+    document.getElementById("box").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    return;
+  }
+  const pr = e.target.closest("[data-project]");
+  if (pr) { const p = pr.dataset.project; state.project = state.project === p ? "all" : p; state.group = null; renderAll(); return; }
+  if (e.target.closest("#clear")) { state.group = null; renderAll(); }
+});
+
+setInterval(() => {
+  document.getElementById("clock").textContent = new Date().toLocaleTimeString("en-GB", { hour12: false });
+}, 1000);
+document.getElementById("clock").textContent = new Date().toLocaleTimeString("en-GB", { hour12: false });
+
+renderAll();
+document.getElementById("proj-seg").onclick = (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.dataset.id === "all") { state.project = "all"; state.group = null; renderAll(); return; }
+  if (state.project === "all") state.project = DATA.projects[0].pj;
+  renderAll();
+};
+</script>
+</body>
+</html>
